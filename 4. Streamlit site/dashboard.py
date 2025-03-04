@@ -115,7 +115,7 @@ def dash_board():
                     fig = plot_graph(df, parameter, sorted_names, parameter_units, graph_type, label_optinos, time_interval,bins)
                 else:
                     fig = plot_graph(df, parameter, sorted_names, parameter_units, graph_type, label_optinos)
-
+    
                 st.session_state['fig'] = fig
                 if graph_type != 'heatmap':
                     if label_optinos is not None:
@@ -144,7 +144,11 @@ def dash_board():
                     logging.error("No data available for the selected parameter.")
 
     if 'fig' in st.session_state:
-        st.plotly_chart(st.session_state['fig'])
+        # Set layout properties for the figure
+
+
+        # Render the plot in Streamlit with container width adjustment
+        st.plotly_chart(fig,use_container_width=True)
 
     if 'df_pivot' in st.session_state:
         df_pivot = st.session_state['df_pivot']

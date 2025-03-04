@@ -1,4 +1,5 @@
 import time
+import pandas as pd
 from data_fetcher import (
     build_url, get_control_systems, get_experiment_parameters,
     get_plant_table, load_config, make_request, process_and_save_data
@@ -36,21 +37,6 @@ def main():
     
     headers = {'Authorization': AUTHORIZATION}
     
-    # Fetch control system data
-    try:
-        control_systems_df = get_control_systems(headers, return_df=True)
-        print("Control system data retrieved.")
-    except Exception as e:
-        print(f"Error fetching control systems: {e}")
-        return
-    
-    print(control_systems_df[["control_system_id", "control_system_name"]])
-    try:
-        control_system_id = int(input("Enter the Control System ID: "))
-    except ValueError:
-        print("Invalid input. Please enter a numerical ID.")
-        return
-    
     # Ask user which operation they want to perform
     task = ask_user("What would you like to do?", [
         "Fetch data for a specific experiment",
@@ -62,14 +48,44 @@ def main():
         print("Exiting program.")
         return
     
+    # Fetch control system data
+    try:
+        control_systems_df = get_control_systems(headers, return_df=True)
+        control_systems_df_no_dupp = control_systems_df.drop_duplicates(subset=["control_system_id", "control_system_name"])
+        print("Control system data retrieved.")
+    except Exception as e:
+        print(f"Error fetching control systems: {e}")
+        return
+    
+    print(control_systems_df_no_dupp[["control_system_id", "control_system_name"]])
+    
+    try:
+        control_system_id = int(input("Enter the Control System ID: "))
+        control_system_name = control_systems_df.loc[control_systems_df["control_system_id"] == control_system_id, "control_system_name"].values[0]
+        confirm = input(f"Did you mean '{control_system_name}'? (yes/no): ")
+        if confirm.lower() != "yes" or confirm.lower() == "y":
+            print("Please restart and enter the correct Control System ID.")
+            return
+    except (ValueError, IndexError):
+        print("Invalid input. Please enter a valid numerical ID.")
+        return
+    
     if task == "Fetch data for a specific experiment":
         filtered_experiments = control_systems_df[control_systems_df["control_system_id"] == control_system_id]
+        filtered_experiments = filtered_experiments.drop_duplicates(subset=["experiment_id", "experiment_name"])
         print(filtered_experiments[["experiment_id", "experiment_name"]])
+        
         try:
             experiment_id = int(input("Enter the Experiment ID: "))
-        except ValueError:
-            print("Invalid input. Please enter a numerical ID.")
+            experiment_name = filtered_experiments.loc[filtered_experiments["experiment_id"] == experiment_id, "experiment_name"].values[0]
+            confirm = input(f"Did you mean '{experiment_name}'? (yes/no): ")
+            if confirm.lower() != "yes" or confirm.lower() == "y":
+                print("Please restart and enter the correct Experiment ID.")
+                return
+        except (ValueError, IndexError):
+            print("Invalid input. Please enter a valid numerical ID.")
             return
+        
         experiments = [(experiment_id, control_system_id)]
     else:
         experiments = list(control_systems_df[control_systems_df["control_system_id"] == control_system_id][['experiment_id', 'control_system_id']].itertuples(index=False, name=None))
@@ -89,17 +105,25 @@ def main():
         try:
             experiment_params_df = get_experiment_parameters(headers, experiment_id, control_system_id, return_df=True)
             print("Experiment parameters retrieved.")
+            if experiment_params_df is not None and not experiment_params_df.empty:
+                PARAMETERS_SPESIFIC = experiment_params_df["Value"].dropna().unique().tolist()  # Extract unique parameter values
+            else:
+                print("Warning: No parameters found for this experiment.")
+                print("Using default parameters instead.")
+                continue
         except Exception as e:
             print(f"Error fetching experiment parameters: {e}")
             continue
         
-        for idx, params in enumerate(PARAMETERS):
+        for idx, params in enumerate(PARAMETERS_SPESIFIC):
+            param_name_str = experiment_params_df[experiment_params_df["Value"] == params]["Name"].values[0]
+            param_category_str = experiment_params_df[experiment_params_df["Value"] == params]["Category"].values[0]
             url = build_url(experiment_id, control_system_id, START_DATE, YESTERDAY, PLANTS_ID, params)
-            print(f"Requesting data for {params}...")
+            print(f"Requesting data for {param_name_str}-{params}...")
             json_data = make_request(url, headers)
 
             if json_data:
-                file_name = f"{FILES[idx] if idx < len(FILES) else f'data_{params}.csv'}"
+                file_name = f"{FILES[idx] if idx < len(FILES) else f'{param_name_str}_{params}.csv'}"
                 process_and_save_data(
                     json_data=json_data, 
                     params_list=params, 
@@ -108,7 +132,8 @@ def main():
                     PLANTS_ID_DICT=PLANTS_ID_DICT, 
                     headers=headers, 
                     experiment_id=experiment_id, 
-                    control_system_id=control_system_id
+                    control_system_id=control_system_id,
+                    category=param_category_str
                 )
     
     print(f"Process completed in {time.time() - start_time:.3f} seconds.")

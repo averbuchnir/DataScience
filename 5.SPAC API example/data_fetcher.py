@@ -45,7 +45,8 @@ def make_request(url, headers):
 
 
 
-def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_DICT, headers, experiment_id, control_system_id):
+def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_DICT, 
+                          headers, experiment_id, control_system_id,category):
     """
     Processes JSON data from the API and saves it to a CSV file inside a structured folder.
 
@@ -83,7 +84,7 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
         ].values[0]
 
         # Construct folder path dynamically
-        folder_path = os.path.join('pulled_data', f"{control_system_name}_{experiment_name}")
+        folder_path = os.path.join('pulled_data', f"{control_system_name}_{experiment_name}",f"{category}")
         os.makedirs(folder_path, exist_ok=True)
 
         # Iterate over parameters
@@ -132,6 +133,8 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
         print(f"Key error processing data: {e}")
     except Exception as e:
         print(f"Error during data processing: {e}")
+
+
 
 
 

@@ -109,5 +109,4 @@ def plot_graph(df, parameter, sorted_names, parameter_units, graph_type,
                 labels={parameter: f'{parameter} ({parameter_units[parameter]})'},
                 title=f'Histogram of {parameter.capitalize()}'
             )
-
     return fig

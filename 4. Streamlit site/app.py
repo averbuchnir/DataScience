@@ -25,8 +25,22 @@ from dashboard import dash_board
 #     format='%(asctime)s,%(levelname)s,%(message)s',
 #     datefmt='%Y-%m-%d %H:%M:%S'
 # )
+# Add custom CSS for background
+def add_bg_with_gradient():
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background: linear-gradient(to right, #d4fc79, #96e6a1);
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 
 def main():
+    add_bg_with_gradient()
     dash_board()
 
 if __name__ == '__main__':
