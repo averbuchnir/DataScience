@@ -45,9 +45,9 @@ def make_request(url, headers):
 
 
 
-def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_DICT):
+def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_DICT, headers, experiment_id, control_system_id):
     """
-    Processes JSON data from the API and saves it to a CSV file.
+    Processes JSON data from the API and saves it to a CSV file inside a structured folder.
 
     Args:
         json_data (dict): The JSON data from the API.
@@ -55,14 +55,36 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
         plants (list): A list of plant identifiers.
         file_name (str): The name of the CSV file.
         PLANTS_ID_DICT (dict): A dictionary mapping plant IDs to their names.
+        headers (dict): Headers containing the Authorization token.
+        experiment_id (int): The experiment ID.
+        control_system_id (int): The control system ID.
     """
     try:
-        # Ensure params_list is a list (handle cases where it's mistakenly a string)
+        # Ensure params_list is a list
         if isinstance(params_list, str):
-            params_list = [params_list]  # Convert single string to a list
+            params_list = [params_list]
 
         all_data = []
         timestamps = set()
+
+        # Get control system name and experiment name
+        control_systems_df = get_control_systems(headers, return_df=True)
+        if control_systems_df is None or control_systems_df.empty:
+            print("Error: Could not retrieve control system details.")
+            return
+
+        control_system_name = control_systems_df.loc[
+            control_systems_df.control_system_id == control_system_id, "control_system_name"
+        ].values[0]
+
+        experiment_name = control_systems_df.loc[
+            (control_systems_df.control_system_id == control_system_id) & 
+            (control_systems_df.experiment_id == experiment_id), "experiment_name"
+        ].values[0]
+
+        # Construct folder path dynamically
+        folder_path = os.path.join('pulled_data', f"{control_system_name}_{experiment_name}")
+        os.makedirs(folder_path, exist_ok=True)
 
         # Iterate over parameters
         for param in params_list:
@@ -72,8 +94,8 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
 
             arr_data = json_data["group1"]["data"][param]
 
-            # Temporary dictionary to hold values for each plant and parameter
-            param_data = {"Timestamp": [], "Parameter": [], **{plant: [] for plant in plants}}
+            # Temporary dictionary to hold values for each plant
+            param_data = {"Timestamp": [], **{plant: [] for plant in plants}}
 
             # Extract timestamps and plant values
             for ts_entry in arr_data:
@@ -82,7 +104,6 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
                 values = ts_entry[1:]
 
                 param_data["Timestamp"].append(timestamp)
-                param_data["Parameter"].append(param)
 
                 # Assign plant-specific values
                 for i, plant in enumerate(plants):
@@ -97,15 +118,13 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
 
         # Convert timestamps to datetime
         df["Timestamp"] = pd.to_datetime(df["Timestamp"])
-        df.set_index(["Timestamp", "Parameter"], inplace=True)
+        df.set_index("Timestamp", inplace=True)
 
         # Rename plant columns based on PLANTS_ID_DICT
         df.columns = [PLANTS_ID_DICT.get(int(col), col) for col in df.columns]
 
-        # Ensure the directory exists
-        os.makedirs('pulled_data', exist_ok=True)
-
-        file_path = os.path.join('pulled_data', file_name)
+        # Save the file inside the structured folder
+        file_path = os.path.join(folder_path, file_name)
         df.to_csv(file_path)
         print(f"Data saved to {file_path}")
 
@@ -113,6 +132,7 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
         print(f"Key error processing data: {e}")
     except Exception as e:
         print(f"Error during data processing: {e}")
+
 
 
 

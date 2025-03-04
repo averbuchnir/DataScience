@@ -47,22 +47,33 @@ def main():
         print(f"Error fetching plant table: {e}")
         pass
 
-    # fetch the experiment valid paramters
+    # Fetch experiment parameters and store the DataFrame
     try:
-        experiment_params_message = get_experiment_parameters(headers, EXPERIMENT_ID, CONTROL_SYSTEM_ID)
-        print(experiment_params_message)
+        experiment_params_df = get_experiment_parameters(headers, EXPERIMENT_ID, CONTROL_SYSTEM_ID, return_df=True)
+        print("Experiment parameters retrieved.")
     except Exception as e:
         print(f"Error fetching experiment parameters: {e}")
-        pass
+        experiment_params_df = None  # Ensure it's not used if the call fails
 
     for idx, params in enumerate(PARAMETERS):
         url = build_url(EXPERIMENT_ID, CONTROL_SYSTEM_ID, START_DATE, YESTERDAY, PLANTS_ID, params)
         print(f"Requesting data for {params}...")
         json_data = make_request(url, headers)
-        # get the plant_table df 
+
+
+
         if json_data:
             file_name = f"{FILES[idx] if idx < len(FILES) else f'data_{params}.csv'}"
-            process_and_save_data(json_data, params, PLANTS_ID, file_name,PLANTS_ID_DICT)
+            process_and_save_data(
+                json_data=json_data, 
+                params_list=params, 
+                plants=PLANTS_ID, 
+                file_name=file_name, 
+                PLANTS_ID_DICT=PLANTS_ID_DICT, 
+                headers=headers, 
+                experiment_id=EXPERIMENT_ID, 
+                control_system_id=CONTROL_SYSTEM_ID
+            )
 
 print(f"Process completed in {time.time() - start_time:.3f} seconds.")
 if __name__ == "__main__":
