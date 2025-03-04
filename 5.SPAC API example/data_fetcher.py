@@ -43,49 +43,78 @@ def make_request(url, headers):
         print(f"Request failed: {e}")
         return None
 
-import pandas as pd
-import os
 
-def process_and_save_data(json_data, params, plants, file_name,PLANTS_ID_DICT):
+
+def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_DICT):
     """
-    Processes the JSON data returned from the API and saves it to a CSV file in the 'pulled_data' folder.
+    Processes JSON data from the API and saves it to a CSV file.
 
     Args:
-        json_data (dict): The JSON data to process.
-        params (str): The parameter key for which to extract the data.
-        plants (list): A list of plant identifiers for the data.
-        file_name (str): The name of the CSV file to save the data to.
+        json_data (dict): The JSON data from the API.
+        params_list (str | list): A single parameter or a list of parameters.
+        plants (list): A list of plant identifiers.
+        file_name (str): The name of the CSV file.
+        PLANTS_ID_DICT (dict): A dictionary mapping plant IDs to their names.
     """
     try:
-        arr_data = json_data["group1"]["data"][params]
-        dicty = {}
-        temp_ts = []
+        # Ensure params_list is a list (handle cases where it's mistakenly a string)
+        if isinstance(params_list, str):
+            params_list = [params_list]  # Convert single string to a list
 
-        for plant in plants:
-            temp_arr = []
-            for ts in arr_data:
-                temp_ts.append(ts[0])
-                temp_arr.extend(ts[1:])
-            dicty[plant] = temp_arr
+        all_data = []
+        timestamps = set()
 
-        df = pd.DataFrame(dicty)
-        df["Timestamp"] = temp_ts
-        df.set_index("Timestamp", inplace=True)
-        # use PLANTS_ID_DICT to replace the ID in column name with Name
+        # Iterate over parameters
+        for param in params_list:
+            if param not in json_data["group1"]["data"]:
+                print(f"Warning: Parameter '{param}' not found in JSON data.")
+                continue
+
+            arr_data = json_data["group1"]["data"][param]
+
+            # Temporary dictionary to hold values for each plant and parameter
+            param_data = {"Timestamp": [], "Parameter": [], **{plant: [] for plant in plants}}
+
+            # Extract timestamps and plant values
+            for ts_entry in arr_data:
+                timestamp = ts_entry[0]
+                timestamps.add(timestamp)
+                values = ts_entry[1:]
+
+                param_data["Timestamp"].append(timestamp)
+                param_data["Parameter"].append(param)
+
+                # Assign plant-specific values
+                for i, plant in enumerate(plants):
+                    param_data[plant].append(values[i] if i < len(values) else None)  # Handle missing values safely
+
+            # Convert to DataFrame
+            param_df = pd.DataFrame(param_data)
+            all_data.append(param_df)
+
+        # Combine all parameters into a single DataFrame
+        df = pd.concat(all_data, ignore_index=True)
+
+        # Convert timestamps to datetime
+        df["Timestamp"] = pd.to_datetime(df["Timestamp"])
+        df.set_index(["Timestamp", "Parameter"], inplace=True)
+
+        # Rename plant columns based on PLANTS_ID_DICT
         df.columns = [PLANTS_ID_DICT.get(int(col), col) for col in df.columns]
 
-
         # Ensure the directory exists
-        if not os.path.exists('pulled_data'):
-            os.makedirs('pulled_data')
+        os.makedirs('pulled_data', exist_ok=True)
 
         file_path = os.path.join('pulled_data', file_name)
         df.to_csv(file_path)
         print(f"Data saved to {file_path}")
+
     except KeyError as e:
         print(f"Key error processing data: {e}")
     except Exception as e:
         print(f"Error during data processing: {e}")
+
+
 
 def build_url(experiment_id, control_system_id, start_date, yesterday, plants, params):
     """
@@ -108,7 +137,7 @@ def build_url(experiment_id, control_system_id, start_date, yesterday, plants, p
         f"controlSystemId={control_system_id}&"
         f"fromDate={start_date}T00:00:00.000Z&"
         f"toDate={yesterday}T23:59:59.999Z&"
-        f"plants={','.join(plants)}&"
+        f"plants={','.join(map(str, plants))}&"
         f"params={params}"
     )
 
@@ -226,3 +255,81 @@ def get_plant_table(headers, experiment_id, control_system_id,return_df=False):
 
     except Exception as e:
         return f"Error processing data: {e}"
+
+import os
+import requests
+import pandas as pd
+
+def get_experiment_parameters(headers, experiment_id, control_system_id, return_df=False):
+    """
+    Fetches experiment parameters from the API and saves them to a CSV file.
+
+    Args:
+        headers (dict): A dictionary containing the headers for the request, including Authorization.
+        experiment_id (int): The experiment ID.
+        control_system_id (int): The control system ID.
+        return_df (bool, optional): Whether to return a DataFrame instead of saving to a file. Defaults to False.
+
+    Returns:
+        str: Path to the saved CSV file or an error message.
+        pd.DataFrame: DataFrame of experiment parameters if return_df=True.
+    """
+    url = f"https://api.spac.plant-ditech.com/api/parameters?experimentId={experiment_id}&controlSystemId={control_system_id}"
+
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raise an error for failed requests
+        json_data = response.json()
+
+        if not json_data:
+            print("Warning: No parameters returned from the API.")
+            return None if return_df else "No data available"
+
+        # Flatten JSON structure
+        data_records = []
+        for category, parameters in json_data.items():
+            for param in parameters:
+                data_records.append({
+                    "Category": category,
+                    "Name": param.get("name", "N/A"),
+                    "Type": param.get("type", "N/A"),
+                    "Value": param.get("value", "N/A"),
+                    "Units": param.get("units", "N/A")
+                })
+
+        # Convert to DataFrame
+        df = pd.DataFrame(data_records)
+
+        # Ensure the directory exists
+        directory = "experiment_parameters"
+        os.makedirs(directory, exist_ok=True)
+
+        # Fetch control system name and experiment name
+        control_systems_df = get_control_systems(headers, return_df=True)
+        if control_systems_df is not None and not control_systems_df.empty:
+            control_system_name = control_systems_df.loc[
+                control_systems_df.control_system_id == control_system_id, "control_system_name"
+            ].values[0]
+
+            experiment_name = control_systems_df.loc[
+                (control_systems_df.control_system_id == control_system_id) & 
+                (control_systems_df.experiment_id == experiment_id), "experiment_name"
+            ].values[0]
+
+            # Save the DataFrame
+            file_path = os.path.join(directory, f"{control_system_name}_{experiment_name}_experiment_parameters.csv")
+            df.to_csv(file_path, index=False)
+
+            if return_df:
+                return df
+            return f"Data saved to {file_path}"
+
+        else:
+            return "Error: Could not retrieve control system details."
+
+    except requests.exceptions.RequestException as e:
+        return f"API request error: {e}"
+    except KeyError as e:
+        return f"Key error processing data: {e}"
+    except Exception as e:
+        return f"Error during data processing: {e}"

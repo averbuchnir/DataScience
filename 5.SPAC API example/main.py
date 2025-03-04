@@ -1,5 +1,9 @@
 import time
-from data_fetcher import load_config, make_request, process_and_save_data, build_url, get_control_systems,get_plant_table
+from data_fetcher import (
+    build_url, get_control_systems, get_experiment_parameters,
+    get_plant_table, load_config, make_request, process_and_save_data
+)
+
 start_time = time.time()
 
 def main():
@@ -36,20 +40,26 @@ def main():
     try:
         plant_table_message = get_plant_table(headers, EXPERIMENT_ID, CONTROL_SYSTEM_ID)
         print(plant_table_message)
+        plant_table_df = get_plant_table(headers, EXPERIMENT_ID, CONTROL_SYSTEM_ID, return_df=True)
+        # create dict based on ID and Name
+        PLANTS_ID_DICT = dict(zip(plant_table_df["ID"], plant_table_df["Name"]))
     except Exception as e:
         print(f"Error fetching plant table: {e}")
         pass
 
+    # fetch the experiment valid paramters
+    try:
+        experiment_params_message = get_experiment_parameters(headers, EXPERIMENT_ID, CONTROL_SYSTEM_ID)
+        print(experiment_params_message)
+    except Exception as e:
+        print(f"Error fetching experiment parameters: {e}")
+        pass
+
     for idx, params in enumerate(PARAMETERS):
         url = build_url(EXPERIMENT_ID, CONTROL_SYSTEM_ID, START_DATE, YESTERDAY, PLANTS_ID, params)
-
         print(f"Requesting data for {params}...")
         json_data = make_request(url, headers)
         # get the plant_table df 
-        plant_table_df = get_plant_table(headers, EXPERIMENT_ID, CONTROL_SYSTEM_ID, return_df=True)
-        # create dict based on ID and Name
-        PLANTS_ID_DICT = dict(zip(plant_table_df["ID"], plant_table_df["Name"]))
-  
         if json_data:
             file_name = f"{FILES[idx] if idx < len(FILES) else f'data_{params}.csv'}"
             process_and_save_data(json_data, params, PLANTS_ID, file_name,PLANTS_ID_DICT)
