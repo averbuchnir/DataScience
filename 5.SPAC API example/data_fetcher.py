@@ -46,7 +46,7 @@ def make_request(url, headers):
 import pandas as pd
 import os
 
-def process_and_save_data(json_data, params, plants, file_name):
+def process_and_save_data(json_data, params, plants, file_name,PLANTS_ID_DICT):
     """
     Processes the JSON data returned from the API and saves it to a CSV file in the 'pulled_data' folder.
 
@@ -71,6 +71,9 @@ def process_and_save_data(json_data, params, plants, file_name):
         df = pd.DataFrame(dicty)
         df["Timestamp"] = temp_ts
         df.set_index("Timestamp", inplace=True)
+        # use PLANTS_ID_DICT to replace the ID in column name with Name
+        df.columns = [PLANTS_ID_DICT.get(int(col), col) for col in df.columns]
+
 
         # Ensure the directory exists
         if not os.path.exists('pulled_data'):
@@ -110,7 +113,7 @@ def build_url(experiment_id, control_system_id, start_date, yesterday, plants, p
     )
 
 
-def get_control_systems(headers):
+def get_control_systems(headers,return_df=False):
     """
     Fetches control system data from the API, processes it, and saves it as a CSV file.
 
@@ -158,6 +161,9 @@ def get_control_systems(headers):
         # Save the DataFrame
         file_path = os.path.join(directory, "control_system_data.csv")
         df.to_csv(file_path, index=False)
+        if return_df:
+            return df
+        
         return f"Data saved to {file_path}"
 
     except requests.exceptions.RequestException as e:
@@ -168,7 +174,7 @@ def get_control_systems(headers):
     
 
 
-def get_plant_table(headers, experiment_id, control_system_id):
+def get_plant_table(headers, experiment_id, control_system_id,return_df=False):
     """
     Fetches plant and label data from the API for specified experiment and control system, processes it, and saves it as a CSV file.
 
@@ -203,9 +209,16 @@ def get_plant_table(headers, experiment_id, control_system_id):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+        control_systems_df = get_control_systems(headers,return_df=True)
+        # get the control system name and experiment name
+        control_system_name = control_systems_df[control_systems_df.control_system_id == control_system_id]["control_system_name"].values[0]
+        experiment_id_name = control_systems_df[(control_systems_df.control_system_id==42) & (control_systems_df.experiment_id==3)]["experiment_name"].values[0]      
         # Save the DataFrame
-        file_path = os.path.join(directory, f"{control_system_id}_{experiment_id}_get_plant_table.csv")
+        file_path = os.path.join(directory, f"{control_system_name}_{experiment_id_name}_get_plant_table.csv")
         df.to_csv(file_path, index=False)
+        if return_df:
+            return df
+        
         return f"Data saved to {file_path}"
 
     except requests.exceptions.RequestException as e:

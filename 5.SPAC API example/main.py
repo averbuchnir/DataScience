@@ -33,20 +33,26 @@ def main():
         pass    
 
     # fetch the plant table of specific control system
-        # Fetch and print the plant table
-    plant_table_message = get_plant_table(headers, EXPERIMENT_ID, CONTROL_SYSTEM_ID)
-    print(plant_table_message)
-
+    try:
+        plant_table_message = get_plant_table(headers, EXPERIMENT_ID, CONTROL_SYSTEM_ID)
+        print(plant_table_message)
+    except Exception as e:
+        print(f"Error fetching plant table: {e}")
+        pass
 
     for idx, params in enumerate(PARAMETERS):
         url = build_url(EXPERIMENT_ID, CONTROL_SYSTEM_ID, START_DATE, YESTERDAY, PLANTS_ID, params)
 
         print(f"Requesting data for {params}...")
         json_data = make_request(url, headers)
-
+        # get the plant_table df 
+        plant_table_df = get_plant_table(headers, EXPERIMENT_ID, CONTROL_SYSTEM_ID, return_df=True)
+        # create dict based on ID and Name
+        PLANTS_ID_DICT = dict(zip(plant_table_df["ID"], plant_table_df["Name"]))
+  
         if json_data:
             file_name = f"{FILES[idx] if idx < len(FILES) else f'data_{params}.csv'}"
-            process_and_save_data(json_data, params, PLANTS_ID, file_name)
+            process_and_save_data(json_data, params, PLANTS_ID, file_name,PLANTS_ID_DICT)
 
 print(f"Process completed in {time.time() - start_time:.3f} seconds.")
 if __name__ == "__main__":
