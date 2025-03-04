@@ -2,6 +2,7 @@ import json
 import requests
 import pandas as pd
 import time
+import os
 
 def load_config(file_path="config.json"):
     """
@@ -42,9 +43,12 @@ def make_request(url, headers):
         print(f"Request failed: {e}")
         return None
 
+import pandas as pd
+import os
+
 def process_and_save_data(json_data, params, plants, file_name):
     """
-    Processes the JSON data returned from the API and saves it to a CSV file.
+    Processes the JSON data returned from the API and saves it to a CSV file in the 'pulled_data' folder.
 
     Args:
         json_data (dict): The JSON data to process.
@@ -67,8 +71,14 @@ def process_and_save_data(json_data, params, plants, file_name):
         df = pd.DataFrame(dicty)
         df["Timestamp"] = temp_ts
         df.set_index("Timestamp", inplace=True)
-        df.to_csv(file_name)
-        print(f"Data saved to {file_name}")
+
+        # Ensure the directory exists
+        if not os.path.exists('pulled_data'):
+            os.makedirs('pulled_data')
+
+        file_path = os.path.join('pulled_data', file_name)
+        df.to_csv(file_path)
+        print(f"Data saved to {file_path}")
     except KeyError as e:
         print(f"Key error processing data: {e}")
     except Exception as e:
@@ -98,3 +108,108 @@ def build_url(experiment_id, control_system_id, start_date, yesterday, plants, p
         f"plants={','.join(plants)}&"
         f"params={params}"
     )
+
+
+def get_control_systems(headers):
+    """
+    Fetches control system data from the API, processes it, and saves it as a CSV file.
+
+    Args:
+        headers (dict): A dictionary containing the headers for the request, including Authorization.
+
+    Returns:
+        str: Path to the saved CSV file or an error message.
+    """
+    url = "https://api.spac.plant-ditech.com/api/controlsystem"
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # This will raise an exception for HTTP errors
+        data = response.json()
+        
+        # Flatten the JSON data into a table
+        flattened_data = []
+        for entry in data:
+            for experiment in entry['experiments']:
+                flattened_data.append({
+                    'control_system_id': entry['id'],
+                    'control_system_name': entry['name'],
+                    'experiment_id': experiment['iD'],
+                    'experiment_name': experiment['name'],
+                    'state': experiment['state'],
+                    'start_time': experiment.get('startTime', None),
+                    'end_time': experiment.get('endTime', None),
+                    'zero_hour': experiment['zeroHour'],
+                    'daily_weight_start': experiment['dailyWeightStart'],
+                    'daily_weight_duration': experiment['dailyWeightDuration'],
+                    'active': experiment['active'],
+                    'admin_name': experiment.get('adminName', None),
+                    'admin_email': experiment.get('adminEmail', None),
+                    'watering_frequency': experiment['wateringFrequency']
+                })
+
+        # Convert the list of dictionaries to a DataFrame
+        df = pd.DataFrame(flattened_data)
+
+        # Ensure the directory exists
+        directory = "control_system"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        # Save the DataFrame
+        file_path = os.path.join(directory, "control_system_data.csv")
+        df.to_csv(file_path, index=False)
+        return f"Data saved to {file_path}"
+
+    except requests.exceptions.RequestException as e:
+        return f"Request failed: {e}"
+
+    except Exception as e:
+        return f"Error processing data: {e}"
+    
+
+
+def get_plant_table(headers, experiment_id, control_system_id):
+    """
+    Fetches plant and label data from the API for specified experiment and control system, processes it, and saves it as a CSV file.
+
+    Args:
+        headers (dict): A dictionary containing the headers for the request, including Authorization.
+        experiment_id (int): The experiment ID to fetch data for.
+        control_system_id (int): The control system ID to fetch data for.
+
+    Returns:
+        str: Path to the saved CSV file or an error message.
+    """
+    url = f"https://api.spac.plant-ditech.com/api/plantsandlabels?experimentId={experiment_id}&controlSystemId={control_system_id}"
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # This will raise an exception for HTTP errors
+        data = response.json()
+        
+        # Flatten the JSON data into a table
+        plants = []
+        for plant in data['plants']:
+            plants.append({
+                'ID': plant['iD'],
+                'Name': plant['name'],
+                'Active': plant['active']
+            })
+
+        # Convert the list of dictionaries to a DataFrame
+        df = pd.DataFrame(plants)
+
+        # Ensure the directory exists
+        directory = "get_plant_table"
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        # Save the DataFrame
+        file_path = os.path.join(directory, f"{control_system_id}_{experiment_id}_get_plant_table.csv")
+        df.to_csv(file_path, index=False)
+        return f"Data saved to {file_path}"
+
+    except requests.exceptions.RequestException as e:
+        return f"Request failed: {e}"
+
+    except Exception as e:
+        return f"Error processing data: {e}"

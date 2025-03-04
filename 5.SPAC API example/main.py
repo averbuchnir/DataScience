@@ -1,5 +1,6 @@
 import time
-from data_fetcher import load_config, make_request, process_and_save_data, build_url
+from data_fetcher import load_config, make_request, process_and_save_data, build_url, get_control_systems,get_plant_table
+start_time = time.time()
 
 def main():
     """
@@ -23,17 +24,30 @@ def main():
     FILES = config["FILES"]
 
     headers = {'Authorization': AUTHORIZATION}
+    # Fetch and print control system data
+    try:
+        control_systems = get_control_systems(headers)
+        print(f"Control systems: {control_systems}")
+    except Exception as e:
+        print(f"Error fetching control systems: {e}")
+        pass    
 
-    for params in PARAMETERS:
+    # fetch the plant table of specific control system
+        # Fetch and print the plant table
+    plant_table_message = get_plant_table(headers, EXPERIMENT_ID, CONTROL_SYSTEM_ID)
+    print(plant_table_message)
+
+
+    for idx, params in enumerate(PARAMETERS):
         url = build_url(EXPERIMENT_ID, CONTROL_SYSTEM_ID, START_DATE, YESTERDAY, PLANTS_ID, params)
 
         print(f"Requesting data for {params}...")
         json_data = make_request(url, headers)
 
         if json_data:
-            process_and_save_data(json_data, params, PLANTS_ID, FILES[0])
+            file_name = f"{FILES[idx] if idx < len(FILES) else f'data_{params}.csv'}"
+            process_and_save_data(json_data, params, PLANTS_ID, file_name)
 
-    print(f"Process completed in {time.time() - start_time:.3f} seconds.")
-
+print(f"Process completed in {time.time() - start_time:.3f} seconds.")
 if __name__ == "__main__":
     main()
