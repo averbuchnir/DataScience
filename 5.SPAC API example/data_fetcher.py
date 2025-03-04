@@ -46,7 +46,7 @@ def make_request(url, headers):
 
 
 def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_DICT, 
-                          headers, experiment_id, control_system_id,category):
+                          headers, experiment_id, control_system_id,category="All"):
     """
     Processes JSON data from the API and saves it to a CSV file inside a structured folder.
 

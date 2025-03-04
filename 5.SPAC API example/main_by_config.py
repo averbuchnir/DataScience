@@ -55,8 +55,10 @@ def main():
         print(f"Error fetching experiment parameters: {e}")
         experiment_params_df = None  # Ensure it's not used if the call fails
 
+
     for idx, params in enumerate(PARAMETERS):
         url = build_url(EXPERIMENT_ID, CONTROL_SYSTEM_ID, START_DATE, YESTERDAY, PLANTS_ID, params)
+        print("this is the url\n: ", url)
         print(f"Requesting data for {params}...")
         json_data = make_request(url, headers)
 
@@ -72,7 +74,7 @@ def main():
                 PLANTS_ID_DICT=PLANTS_ID_DICT, 
                 headers=headers, 
                 experiment_id=EXPERIMENT_ID, 
-                
+
                 control_system_id=CONTROL_SYSTEM_ID
             )
 

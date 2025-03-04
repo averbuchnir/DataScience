@@ -29,8 +29,6 @@ def main():
 
     # Assign config values
     AUTHORIZATION = config["AUTHORIZATION"]
-    START_DATE = config["START_DATE"]
-    YESTERDAY = config["YESTERDAY"]
     PARAMETERS = config["PARAMETERS"]
     PLANTS_ID = config["PLANTS_ID"]
     FILES = config["FILES"]
@@ -56,14 +54,14 @@ def main():
     except Exception as e:
         print(f"Error fetching control systems: {e}")
         return
-    
     print(control_systems_df_no_dupp[["control_system_id", "control_system_name"]])
+    
     
     try:
         control_system_id = int(input("Enter the Control System ID: "))
         control_system_name = control_systems_df.loc[control_systems_df["control_system_id"] == control_system_id, "control_system_name"].values[0]
-        confirm = input(f"Did you mean '{control_system_name}'? (yes/no): ")
-        if confirm.lower() != "yes" or confirm.lower() == "y":
+        confirm = input(f"Did you mean '{control_system_name}'? (y/n): ")
+        if confirm.lower() != "y":
             print("Please restart and enter the correct Control System ID.")
             return
     except (ValueError, IndexError):
@@ -78,8 +76,8 @@ def main():
         try:
             experiment_id = int(input("Enter the Experiment ID: "))
             experiment_name = filtered_experiments.loc[filtered_experiments["experiment_id"] == experiment_id, "experiment_name"].values[0]
-            confirm = input(f"Did you mean '{experiment_name}'? (yes/no): ")
-            if confirm.lower() != "yes" or confirm.lower() == "y":
+            confirm = input(f"Did you mean '{experiment_name}'? (y/n): ")
+            if confirm.lower() != "y":
                 print("Please restart and enter the correct Experiment ID.")
                 return
         except (ValueError, IndexError):
@@ -90,12 +88,13 @@ def main():
     else:
         experiments = list(control_systems_df[control_systems_df["control_system_id"] == control_system_id][['experiment_id', 'control_system_id']].itertuples(index=False, name=None))
     
+
     for experiment_id, control_system_id in experiments:
         print(f"Processing Experiment ID {experiment_id} in Control System {control_system_id}...")
-
         # Fetch plant data
         try:
             plant_table_df = get_plant_table(headers, experiment_id, control_system_id, return_df=True)
+            PLANTS_ID = plant_table_df["ID"].tolist()
             PLANTS_ID_DICT = dict(zip(plant_table_df["ID"], plant_table_df["Name"]))
         except Exception as e:
             print(f"Error fetching plant table: {e}")
@@ -104,26 +103,57 @@ def main():
         # Fetch experiment parameters
         try:
             experiment_params_df = get_experiment_parameters(headers, experiment_id, control_system_id, return_df=True)
+            PARAMETERS = experiment_params_df["Value"].tolist()
+            PARAMETERS_TO_NAME = dict(zip(experiment_params_df["Value"], experiment_params_df["Name"]))
+            PARAMETERS_TO_CATEGORY = dict(zip(experiment_params_df["Value"], experiment_params_df["Category"]))
+            # create dict based on Value - Name
             print("Experiment parameters retrieved.")
-            if experiment_params_df is not None and not experiment_params_df.empty:
-                PARAMETERS_SPESIFIC = experiment_params_df["Value"].dropna().unique().tolist()  # Extract unique parameter values
-            else:
-                print("Warning: No parameters found for this experiment.")
-                print("Using default parameters instead.")
-                continue
         except Exception as e:
             print(f"Error fetching experiment parameters: {e}")
             continue
+
+        start_time = control_systems_df[(control_systems_df.control_system_id==control_system_id) 
+                                        & (control_systems_df.experiment_id==experiment_id)]["start_time"].values[0]
+        start_time_modified = pd.to_datetime(start_time).strftime("%Y-%m-%d")
+
+        end_time = control_systems_df[(control_systems_df.control_system_id==control_system_id)
+                                      & (control_systems_df.experiment_id==experiment_id)]["end_time"].values[0]
+        # if end_time is NaN then set it to today, else set it to the end_time
+        if pd.isna(end_time):
+            end_time = pd.Timestamp.now().strftime("%Y-%m-%d")
+        end_time = pd.to_datetime(end_time).strftime("%Y-%m-%d") 
+
+   
+  
+        # write message that state the experiment, control system, start time and end time
+        print(f"Fetching data for Experiment ID {experiment_id} in Control System {control_system_id} from {start_time_modified} to {end_time}...")
         
-        for idx, params in enumerate(PARAMETERS_SPESIFIC):
-            param_name_str = experiment_params_df[experiment_params_df["Value"] == params]["Name"].values[0]
-            param_category_str = experiment_params_df[experiment_params_df["Value"] == params]["Category"].values[0]
-            url = build_url(experiment_id, control_system_id, START_DATE, YESTERDAY, PLANTS_ID, params)
-            print(f"Requesting data for {param_name_str}-{params}...")
+        # Ask user if they want to modify the start and end time
+        modify_time = input("Do you want to modify the start and end time? (y/n): ")
+        if modify_time.lower() == 'y':
+            try:
+                user_start_time = input(f"Enter the start time (current: {start_time_modified}, format: YYYY-MM-DD): ")
+                user_end_time = input(f"Enter the end time (current: {end_time}, format: YYYY-MM-DD): ")
+            
+                # Validate the date format
+                pd.to_datetime(user_start_time, format="%Y-%m-%d")
+                pd.to_datetime(user_end_time, format="%Y-%m-%d")
+                
+                start_time_modified = user_start_time
+                end_time = user_end_time
+            except ValueError:
+                print("Invalid date format. Please use YYYY-MM-DD.")
+                return
+
+        for idx, params in enumerate(PARAMETERS):
+            print(f"Requesting data for {PARAMETERS_TO_NAME[params]}...")
+            url = build_url(experiment_id, control_system_id, start_time_modified, end_time, PLANTS_ID, params)
             json_data = make_request(url, headers)
+            # timeout for 1 second
+            time.sleep(1.5)
 
             if json_data:
-                file_name = f"{FILES[idx] if idx < len(FILES) else f'{param_name_str}_{params}.csv'}"
+                file_name = f"{FILES[idx] if idx < len(FILES) else f'{PARAMETERS_TO_NAME[params]}.csv'}"
                 process_and_save_data(
                     json_data=json_data, 
                     params_list=params, 
@@ -133,10 +163,9 @@ def main():
                     headers=headers, 
                     experiment_id=experiment_id, 
                     control_system_id=control_system_id,
-                    category=param_category_str
+                    category=PARAMETERS_TO_CATEGORY[params]
                 )
     
-    print(f"Process completed in {time.time() - start_time:.3f} seconds.")
 
 if __name__ == "__main__":
     main()
