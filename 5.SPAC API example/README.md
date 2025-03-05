@@ -13,8 +13,17 @@ The project relies on a configuration file named `config.json` that must be supp
 
 - **AUTHORIZATION**: The API token for authentication.
 
-For `main_interactive.py`, the only required field is:
+For `main_interactive.py`, the following fields must be present in `config.json` but can be left empty, except for the **AUTHORIZATION** field which is required:
 - **AUTHORIZATION**: The API token for authentication.
+- **EXPERIMENT_ID**: Can be left empty.
+- **CONTROL_SYSTEM_ID**: Can be left empty.
+- **START_DATE**: Can be left empty.
+- **YESTERDAY**: Can be left empty.
+- **PARAMETERS**: Can be left empty.
+- **PLANTS_ID**: Can be left empty.
+- **FILES**: Can be left empty.
+
+Ensure this configuration file is correct and present in the same directory as the scripts before running them.
 
 For `main_by_config.py`, the following fields must be filled with valid values:
 - **EXPERIMENT_ID**: Any valid integer (e.g., `14`).
