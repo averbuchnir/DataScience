@@ -30,7 +30,7 @@ def main():
     Interactive main function to orchestrate data fetching, processing, and saving.
     """
     # Log the start of the program with a timestamp.
-    logging.info("Program started at %s", datetime.now().strftime("%Y-%m-%d %H-%M-%d"))
+    logging.info("Program started at %s", datetime.now().strftime("%Y-%m-%d %H:%M:%d"))
     start_time = time.time()
 
     # Load configuration
@@ -40,9 +40,9 @@ def main():
 
     # Assign config values
     AUTHORIZATION = config["AUTHORIZATION"]
-    PARAMETERS = config["PARAMETERS"]
-    PLANTS_ID = config["PLANTS_ID"]
-    FILES = config["FILES"]
+    PARAMETERS = config.get("PARAMETERS", [])
+    PLANTS_ID = config.get("PLANTS_ID", [])
+    FILES = config.get("FILES", [])
     
     headers = {'Authorization': AUTHORIZATION}
     
@@ -116,9 +116,9 @@ def main():
     
 
     for experiment_id, control_system_id in experiments:
-        print(f"Processing Experiment ID {experiment_id} in Control System {control_system_id}...")
+        # print(f"Processing Experiment ID {experiment_id} in Control System {control_system_id}...")
         logging.info("Processing Experiment ID %s in Control System %s", experiment_id, control_system_id)
-        # Fetch plant data
+        logging.info("The program is getting the plant_table,experiment_parameters")
         try:
             plant_table_df = get_plant_table(headers, experiment_id, control_system_id, return_df=True)
             PLANTS_ID = plant_table_df["ID"].tolist()
@@ -182,13 +182,16 @@ def main():
 
         for idx, params in enumerate(PARAMETERS):
             # print(f"Requesting data for {PARAMETERS_TO_NAME[params]}...")
-            logging.info("Requesting data for %s", PARAMETERS_TO_NAME[params])
+            safe_name = PARAMETERS_TO_NAME[params].replace("/", "_")
+            logging.info("Requesting data for %s", safe_name)
             url = build_url(experiment_id, control_system_id, start_time_modified, end_time, PLANTS_ID, params)
             json_data = make_request(url, headers)
-            time.sleep(1.5)
+            time.sleep(1.5) # Sleep for 1.5 seconds to avoid rate limiting
 
             if json_data:
-                file_name = f"{FILES[idx] if idx < len(FILES) else f'{PARAMETERS_TO_NAME[params]}.csv'}"
+                file_name = f"{FILES[idx] if idx < len(FILES) else f'{safe_name}.csv'}"
+                # save file name without "\" replaced to "_"
+                
                 process_and_save_data(
                     json_data=json_data, 
                     params_list=params, 
@@ -205,3 +208,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+4

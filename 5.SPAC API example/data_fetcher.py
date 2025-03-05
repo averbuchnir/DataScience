@@ -67,6 +67,8 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
 
         all_data = []
         timestamps = set()
+        # Create slash in category names to underscore to avoid creating subfolders
+        safe_category = category.replace("/", "_")
 
         # Get control system name and experiment name
         control_systems_df = get_control_systems(headers, return_df=True)
@@ -84,7 +86,7 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
         ].values[0]
 
         # Construct folder path dynamically
-        folder_path = os.path.join('pulled_data', f"{control_system_name}_{experiment_name}",f"{category}")
+        folder_path = os.path.join('pulled_data', f"{control_system_name}_{experiment_name}",f"{safe_category}")
         os.makedirs(folder_path, exist_ok=True)
 
         # Iterate over parameters
@@ -126,6 +128,9 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
 
         # Save the file inside the structured folder
         file_path = os.path.join(folder_path, file_name)
+        # It's good practice to ensure that the path string is valid, especially if names contain special characters or spaces
+        file_path = os.path.normpath(file_path)  # Normalize the path
+
         df.to_csv(file_path)
         print(f"Data saved to {file_path}")
 
@@ -340,7 +345,10 @@ def get_experiment_parameters(headers, experiment_id, control_system_id, return_
             ].values[0]
 
             # Save the DataFrame
-            file_path = os.path.join(directory, f"{control_system_name}_{experiment_name}_experiment_parameters.csv")
+            file_name = f"{control_system_name}_{experiment_name}_experiment_parameters.csv"
+            file_path = os.path.join(directory, file_name)
+            # It's good practice to ensure that the path string is valid, especially if names contain special characters or spaces
+            file_path = os.path.normpath(file_path)  # Normalize the path 
             df.to_csv(file_path, index=False)
 
             if return_df:
