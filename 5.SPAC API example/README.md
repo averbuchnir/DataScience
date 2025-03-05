@@ -7,13 +7,16 @@ This project is designed to facilitate the automated and interactive fetching an
 
 ## Configuration
 
-The project relies on a configuration file named `config.json` that must be supplied by the user. This file should contain the necessary settings to authenticate and make API requests. While most settings are relevant for both scripts, specific details are particularly relevant for the interactive mode.
+The project relies on a configuration file named `config.json` that must be supplied by the user. This file should contain the necessary settings to authenticate and make API requests.
 
 ### `config.json` Structure:
 
 - **AUTHORIZATION**: The API token for authentication.
 
-For `main_interactive.py`, the following fields are not used directly but should still be filled with valid (even if not used) values for compatibility and potential fallback purposes:
+For `main_interactive.py`, the only required field is:
+- **AUTHORIZATION**: The API token for authentication.
+
+For `main_by_config.py`, the following fields must be filled with valid values:
 - **EXPERIMENT_ID**: Any valid integer (e.g., `14`).
 - **CONTROL_SYSTEM_ID**: Any valid integer (e.g., `42`).
 - **START_DATE**: Any valid date (e.g., `"2025-03-03"`).
@@ -89,12 +92,13 @@ pip install requests pandas
 
 - Ensure that the `config.json` file is always updated with the correct and current API credentials and settings before running the scripts.
 - The `data_fetcher.py` script must not be run directly; it only serves as a support module for the other two scripts.
+- All files (`config.json`, `data_fetcher.py`, `main_by_config.py`, and `main_interactive.py`) should be located in the same directory.
 
 ---
 
 ## Support
 
-For issues, suggestions, or further assistance, please contact [averbuch.nir@gmail.com].
+For issues, suggestions, or further assistance, please contact [averbuch.nir@gmail.com](mailto:averbuch.nir@gmail.com) or [nir.averbuch@mail.huji.ac.il](mailto:nir.averbuch@mail.huji.ac.il).
 
 ---
 
