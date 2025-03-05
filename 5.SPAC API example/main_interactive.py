@@ -181,7 +181,6 @@ def main():
                 return
 
         for idx, params in enumerate(PARAMETERS):
-            # print(f"Requesting data for {PARAMETERS_TO_NAME[params]}...")
             safe_name = PARAMETERS_TO_NAME[params].replace("/", "_")
             logging.info("Requesting data for %s", safe_name)
             url = build_url(experiment_id, control_system_id, start_time_modified, end_time, PLANTS_ID, params)
@@ -189,9 +188,15 @@ def main():
             time.sleep(1.5) # Sleep for 1.5 seconds to avoid rate limiting
 
             if json_data:
-                file_name = f"{FILES[idx] if idx < len(FILES) else f'{safe_name}.csv'}"
+                # file_name = f"{FILES[idx] if idx < len(FILES) else f'{safe_name}.csv'}"
                 # save file name without "\" replaced to "_"
                 
+                if any(FILES):
+                    file_name = f"{FILES[idx] if idx < len(FILES) else f'{ PARAMETERS_TO_NAME[params]}.csv'}"
+                    file_name = file_name.replace("/", "_")
+                else:
+                    file_name = f"{safe_name}.csv"
+
                 process_and_save_data(
                     json_data=json_data, 
                     params_list=params, 

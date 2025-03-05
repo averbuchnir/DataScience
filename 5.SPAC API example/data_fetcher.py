@@ -125,12 +125,12 @@ def process_and_save_data(json_data, params_list, plants, file_name, PLANTS_ID_D
 
         # Rename plant columns based on PLANTS_ID_DICT
         df.columns = [PLANTS_ID_DICT.get(int(col), col) for col in df.columns]
-
+        
         # Save the file inside the structured folder
         file_path = os.path.join(folder_path, file_name)
-        # It's good practice to ensure that the path string is valid, especially if names contain special characters or spaces
-        file_path = os.path.normpath(file_path)  # Normalize the path
 
+        # # It's good practice to ensure that the path string is valid, especially if names contain special characters or spaces
+        file_path = os.path.normpath(file_path)  # Normalize the path
         df.to_csv(file_path)
         print(f"Data saved to {file_path}")
 
