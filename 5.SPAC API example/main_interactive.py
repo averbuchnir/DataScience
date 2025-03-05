@@ -181,7 +181,7 @@ def main():
                 return
 
         for idx, params in enumerate(PARAMETERS):
-            safe_name = PARAMETERS_TO_NAME[params].replace("/", "_")
+            safe_name = PARAMETERS_TO_NAME[params].replace("/", "_").replace(";", "_")
             logging.info("Requesting data for %s", safe_name)
             url = build_url(experiment_id, control_system_id, start_time_modified, end_time, PLANTS_ID, params)
             json_data = make_request(url, headers)
@@ -193,7 +193,7 @@ def main():
                 
                 if any(FILES):
                     file_name = f"{FILES[idx] if idx < len(FILES) else f'{ PARAMETERS_TO_NAME[params]}.csv'}"
-                    file_name = file_name.replace("/", "_")
+                    file_name = file_name.replace("/", "_").replace(";", "_")
                 else:
                     file_name = f"{safe_name}.csv"
 
