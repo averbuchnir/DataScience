@@ -7,6 +7,7 @@ from data_fetcher import (
     get_plant_table, load_config, make_request, process_and_save_data
 )
 
+start_time = time.time()
 # Configure logging with timestamp in the format "YYYY-MM-FF H-m-d"
 logging.basicConfig(
     level=logging.INFO,
@@ -157,7 +158,7 @@ def main():
         end_time = pd.to_datetime(end_time_val).strftime("%Y-%m-%d") 
 
         # Write message stating the experiment details.
-        log_msg = f"Fetching data for Experiment ID {experiment_id} in Control System {control_system_id} from {start_time_modified} to {end_time}..."
+        log_msg = f"Fetching data for Experiment ID {experiment_id} in Control System {control_system_id} from {start_time_modified} to {end_time}"
         print(log_msg)
         logging.info(log_msg)
         
@@ -188,7 +189,7 @@ def main():
             time.sleep(1.5) # Sleep for 1.5 seconds to avoid rate limiting
 
             if json_data:
-                # file_name = f"{FILES[idx] if idx < len(FILES) else f'{safe_name}.csv'}"
+                # file_name     = f"{FILES[idx] if idx < len(FILES) else f'{safe_name}.csv'}"
                 # save file name without "\" replaced to "_"
                 
                 if any(FILES):
@@ -210,7 +211,11 @@ def main():
                 )
                 logging.info("Data processed and saved to %s", file_name)
     
-
+    # Log the end of the program with a timestamp and the total runtime.
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    logging.info("Program ended at %s", datetime.now().strftime("%Y-%m-%d %H:%M:%d"))
+    logging.info("Total runtime: %.2f seconds", elapsed_time)
 if __name__ == "__main__":
     main()
 4
