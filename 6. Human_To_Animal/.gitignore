@@ -1,0 +1,21 @@
+# Ignore model storage directory
+model_storage/
+
+# Ignore downloaded images directory
+downloaded_images/
+
+# Ignore log directory
+log/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*.swp
+.venv/
+env/
+venv/
+
