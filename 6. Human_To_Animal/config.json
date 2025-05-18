@@ -1,5 +1,5 @@
 {
-  "animals": ["Dog", "Cat", "Elephant", "snake", "Horse", "Cow", "Sheep", "Goat", "Pig", "Eagle", "Shark", "Frog", "Butterfly", "Ant"],
+  "animals": ["monkey", "chinchilla"],
   "search_queries": {
     "Google": ["face close-up", "realistic animal face", "high-quality animal portrait", "full-frame face"],
     "Bing": ["HD face of", "animal close-up headshot", "sharp focus face", "high-resolution photo"]

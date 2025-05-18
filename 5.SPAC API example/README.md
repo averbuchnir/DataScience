@@ -4,7 +4,6 @@
 This project is designed to facilitate the automated and interactive fetching and processing of whole plant,environmental and imorted data from the Plant-DiTech API. It provides two main modes of operation: a batch mode (`main_by_config.py`) for automated processing based on predefined settings, and an interactive mode (`main_interactive.py`) for user-guided data fetching and processing.
 
 ---
-# nir writing stuff to check
 
 ## Configuration
 
