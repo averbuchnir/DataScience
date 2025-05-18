@@ -10,7 +10,6 @@ This repository showcases various data science skills and techniques that I have
 - [Usage](#usage)  
 - [Dependencies](#dependencies)  
 - [Contributing](#contributing)  
-- [License](#license)  
 - [Contact](#contact)  
 
 ## Project Overview
@@ -68,10 +67,6 @@ The projects use the following libraries:
 ## Contributing
 
 Currently, this portfolio is a personal project. You are welcome to fork the repository and adapt the code for your own learning or research. Issues and suggestions are appreciated.
-
-## License
-
-This repository is licensed under the MIT License. See the LICENSE file for details.
 
 ## Contact
 
