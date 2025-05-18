@@ -1,111 +1,81 @@
+# Data Science Portfolio
 
-# Personal Portfolio for Data Science
+This repository showcases various data science skills and techniques that I have acquired and applied throughout my career as a researcher. The projects in this portfolio highlight proficiency in Python for data manipulation, exploratory data analysis (EDA), visualization (including 3D graphing), machine learning modeling, time-series analysis, and the development of interactive data applications. It is intended as a public-facing portfolio and research showcase for prospective collaborators or employers...
 
-This repository showcases various data science skills and techniques that I, as a Ph.D. in Data Science, have acquired and applied throughout my career. The code and examples presented here highlight my proficiency in Python for data manipulation, visualization, and advanced analytics.
+## Table of Contents
 
-## Table of Contents (Portfolio)
-- [Project Overview](#project-overview)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Dependencies](#dependencies)
-- [Contributing](#contributing)
-- [License](#license)
-
----
+- [Project Overview](#project-overview)  
+- [Portfolio Projects](#portfolio-projects)  
+- [Installation](#installation)  
+- [Usage](#usage)  
+- [Dependencies](#dependencies)  
+- [Contributing](#contributing)  
+- [License](#license)  
+- [Contact](#contact)  
 
 ## Project Overview
-This repository contains Jupyter Notebooks demonstrating various data science techniques, including data visualization, 3D graphing, and data interpolation, using Python. Each notebook is designed to showcase specific skills and methodologies in data science, reflecting the breadth of knowledge from my Ph.D. studies.
+
+In this portfolio, each directory contains a self-contained project or demonstration in Jupyter Notebook format. These projects span a range of data science domains and tasks, from cleaning and visualizing datasets to building predictive models and interactive tools. Each notebook is designed to showcase specific skills and methodologies in data science, reflecting the breadth of knowledge from my Ph.D. studies. By exploring these examples, you can see how I approach data problems, implement algorithms, ...
+
+## Portfolio Projects
+
+Each numbered directory in the repository corresponds to a distinct project or code example:
+
+- **1. Visualization & Data Cleaning:** Demonstrates exploratory data analysis and data cleaning techniques on sample data.
+- **2. Interpolation:** Focuses on methods for interpolating and smoothing data points.
+- **3. LSTM (Time Series Modeling):** A project centered on time-series forecasting using a Long Short-Term Memory neural network.
+- **4. Streamlit Site (Web App Demo):** An example of deploying a data science solution as an interactive web application using Streamlit.
+- **5. SPAC API Example:** Integration of external data via an API in the context of the Soil-Plant-Atmosphere Continuum (SPAC).
+- **6. Human_To_Animal:** A creative machine learning project that explores translating or comparing data patterns between human-related and animal-related datasets.
+- **7. Experiment-Randomizer:** A tool designed to assist with experimental design in scientific research.
+- **8. Custom Streamlit EDA:** A Streamlit-based platform for uploading datasets and constructing custom EDA dashboards via drag-and-drop, with AI-generated insights.
 
 ## Installation
-To run the notebooks, you will need to have Python installed on your system. Once you have Python set up, you can install the required dependencies by running the following command:
 
-\`\`\`bash
+To run these projects locally, ensure you have **Python 3.x** installed on your system. Clone the repository, then install the required Python libraries using pip:
+
+```bash
 pip install -r requirements.txt
-\`\`\`
+```
 
 ## Usage
-After installing the dependencies, you can explore the Jupyter Notebooks in the repository. Open the notebooks in Jupyter Lab or Jupyter Notebook by navigating to the directory and running:
 
-\`\`\`bash
+After installing the dependencies, you can explore each project notebook by launching Jupyter:
+
+```bash
 jupyter notebook
-\`\`\`
+```
 
-Once the notebook server starts, you can select the notebook you want to explore from the list.
+For Streamlit apps:
+
+```bash
+streamlit run path_to_app.py
+```
 
 ## Dependencies
-The following Python libraries are required to run the notebooks in this repository:
 
-- pandas==2.2.2
-- pytz==2024.1
-- matplotlib==3.8.4
-- seaborn==0.13.2
-- plotly==5.22.0
-- numpy==1.26.4
-- ipywidgets==7.8.1
+The projects use the following libraries:
 
-These dependencies are listed in the \`requirements.txt\` file, and you can install them using the command provided in the [Installation](#installation) section.
+- pandas
+- numpy
+- matplotlib
+- seaborn
+- plotly
+- scikit-learn
+- tensorflow / keras
+- streamlit
 
 ## Contributing
-At this time, no contributions are being accepted for this project. However, feel free to fork the repository and modify it for your own use.
+
+Currently, this portfolio is a personal project. You are welcome to fork the repository and adapt the code for your own learning or research. Issues and suggestions are appreciated.
 
 ## License
-This project is not licensed under any specific open-source license.
 
----
+This repository is licensed under the MIT License. See the LICENSE file for details.
 
-# LSTM Model Section
+## Contact
 
-This section of the repository demonstrates the use of Long Short-Term Memory (LSTM) models for time series forecasting.
+For questions, collaborations, or feedback, feel free to contact me:
 
-## Table of Contents (LSTM)
-- [LSTM Model Overview](#lstm-model-overview)
-- [Data Sources](#data-sources)
-- [LSTM Example Notebook](#lstm-example-notebook)
-- [Creating a Conda Environment](#creating-a-conda-environment)
-- [Dependencies (LSTM)](#dependencies-lstm)
-
----
-
-## LSTM Model Overview
-In this section, I showcase how to build an LSTM model for time series forecasting using Python. The model is designed to predict future data points based on historical trends in the dataset.
-
-## Data Sources
-The LSTM model is based on the following key files:
-1. **\`sample_DATA_LSTM.csv\`**: Contains the time-series dataset used for training and testing the LSTM model.
-2. **\`LSTM_example(GridSearch).ipynb\`**: A Jupyter Notebook that explains how to build and fine-tune the LSTM model, including hyperparameter tuning via GridSearch.
-3. **\`LSTM_requiremnt.txt\`**: A file listing all the necessary dependencies to run the LSTM example.
-
-## LSTM Example Notebook
-After setting up the required environment (see the next section), you can run the LSTM model example in the Jupyter Notebook \`LSTM_example(GridSearch).ipynb\`. This notebook includes all the steps for building, training, and evaluating the LSTM model.
-
-## Creating a Conda Environment
-To avoid conflicts with other Python packages, it’s recommended to create a separate Conda environment for running the LSTM model. You can do this as follows:
-
-1. **Create the environment**:
-   \`\`\`bash
-   conda create --name LSTM python=3.8
-   \`\`\`
-
-2. **Activate the environment**:
-   \`\`\`bash
-   conda activate LSTM
-   \`\`\`
-
-3. **Install dependencies**:
-   After activating the environment, install the dependencies by running:
-   \`\`\`bash
-   pip install -r LSTM_requiremnt.txt
-   \`\`\`
-
-## Dependencies (LSTM)
-The LSTM section requires the following Python libraries to be installed:
-
-- numpy==1.24.2
-- pandas==2.0.1
-- plotly==5.11.0
-- scikit-learn==1.1.2
-- tensorflow==2.9.0
-- matplotlib==3.5.2
-- multiprocessing==0.70.13
-
-These dependencies are listed in the \`LSTM_requiremnt.txt\` file and can be installed using the instructions in the [Creating a Conda Environment](#creating-a-conda-environment) section.
+**Nir Averbuch**  
+📧 Email: averbuch.nir@gmail.com
