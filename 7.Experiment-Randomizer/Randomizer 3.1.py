@@ -1,19 +1,3 @@
-# import os,sys
-# import numpy as np
-# import time
-# import random
-# from tkinter import *
-# import time
-# from tkinter import ttk
-# import tkinter.ttk as ttk
-# from pandas import DataFrame
-# import pygetwindow as gw
-# import webbrowser
-# import csv
-# import webbrowser
-# from PIL import ImageGrab
-# from PIL import Image
-
 import os
 import sys
 import numpy as np
