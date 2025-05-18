@@ -17,6 +17,36 @@ Upload your own CSV or use built-in sample datasets, add and configure multiple 
 
 ---
 
+## Project Structure
+
+```
+project-root/
+├── run.py
+├── eda_builder/
+│   ├── frontend/
+│   │   └── ui_builder.py
+│   │   ├── sample_data/
+│   │   │   ├── titanic.csv
+│   │   │   ├── iris.csv
+│   │   │   ├── winequality.csv
+│   │   │   ├── tips.csv
+│   │   │   └── diabetes.csv
+│   │   └── ...
+│   ├── requirements.txt
+│   ├── README.md
+│   └── ...
+├── run.py
+└── ...
+```
+
+- **run.py**: Entry point for the Streamlit app (run with `streamlit run run.py`).
+- **eda_builder/frontend/ui_builder.py**: Main UI logic for the EDA builder.
+- **eda_builder/sample_data/**: Contains all sample datasets used in the app.
+- **requirements.txt**: Python dependencies.
+- **README.md**: Project documentation.
+
+---
+
 ## Getting Started
 
 ### 1. Clone the repository
@@ -35,7 +65,7 @@ pip install -r requirements.txt
 ### 3. Run the app
 
 ```bash
-streamlit run eda_builder/run.py
+streamlit run run.py
 ```
 
 ---
