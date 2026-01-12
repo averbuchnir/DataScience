@@ -1,0 +1,13 @@
+# Ignore everything
+*
+# Ignore all .env files
+.env
+**/.env
+# token files
+auth_token_str.txt
+
+
+
+# Keep .gitignore itself
+!.gitignore
+!README.md
