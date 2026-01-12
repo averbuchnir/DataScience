@@ -6,7 +6,8 @@
 # token files
 auth_token_str.txt
 
-
+# LLMCheckmate folder
+9. LLMCheckmate/
 
 # Keep .gitignore itself
 !.gitignore
