@@ -1,13 +1,24 @@
-# Ignore everything
-*
 # Ignore all .env files
 .env
 **/.env
+
 # token files
 auth_token_str.txt
 
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
 
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# Keep .gitignore itself
-!.gitignore
-!README.md
+# OS
+.DS_Store
+Thumbs.db
