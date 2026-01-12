@@ -37,9 +37,16 @@ def apply_move(state, uci):
     """
     board = state["board"]
 
-    uci = (uci or "").strip().split()[0]
-    if not uci:
+    # Safely extract first token, handling empty strings
+    uci_str = (uci or "").strip()
+    if not uci_str:
         return False
+    
+    split_result = uci_str.split()
+    if not split_result:
+        return False
+    
+    uci = split_result[0]
 
     try:
         move = chess.Move.from_uci(uci)
