@@ -8,6 +8,7 @@ from src.engine import (
     new_game,
     get_fen,
     get_legal_moves,
+    shortlist_legal_moves,
     apply_move,
     is_game_over,
     result,
@@ -25,14 +26,14 @@ def get_move_model(tier,state, side, model, legal_moves=None, move_history=None,
 
 
 def main():
-    for tier in get_tier_keys():
+    for tier in get_tier_keys()[::-1]:
         print(f"Tier: {tier}")
         tier_gpt_model = get_model_names(tier)["gpt"]
         tier_gemini_model = get_model_names(tier)["gemini"]
         print("=== performing tournament for {tier} tier ===")
         print("=== {} Vs {} ===".format(tier_gpt_model, tier_gemini_model))
     
-        number_of_games = 1  # Number of games to play
+        number_of_games = 10  # Number of games to play in each tier
         print("=== LLMCheckmate: Multiple Games Tournament ===")
         print(f"Playing {number_of_games} games...")
         print()
@@ -76,7 +77,7 @@ def main():
             }
             board_positions = []
             ply = 0 # number of plies
-            max_plies = 10 # avoid infinite random games
+            max_plies = 50 # avoid infinite random games
             max_retries = 3 # number of retries for each move    
             while not is_game_over(state) and ply < max_plies:
                 fen_before = get_fen(state)
@@ -85,14 +86,17 @@ def main():
                 model_name = tier_gpt_model if model == "gpt" else tier_gemini_model
 
                 legal_moves = get_legal_moves(state)
-
+                legal_moves_shortlist = shortlist_legal_moves(state["board"], quiet_k=8)
+                # print the delta of legal moves between shortlist and all legal moves 
+                print(f"legal_moves: {len(legal_moves)} | legal_moves_shortlist: {len(legal_moves_shortlist)} | Delta: {len(legal_moves) - len(legal_moves_shortlist)}")
+            
                 uci = ""
                 ok = False
                 raw_move = ""
                 num_attempts = 0
                 for attempt in range(max_retries+1):
                     num_attempts = attempt + 1
-                    legal_for_prompt = legal_moves  # always provide legal moves to help LLM
+                    legal_for_prompt = legal_moves_shortlist  # use shortlist instead of all legal moves
 
                     raw_move = get_move_model(
                         tier=tier,
@@ -136,6 +140,7 @@ def main():
                     "model_name": model_name,
                     "fen_before": fen_before,
                     "fen_after": fen_after,
+                    "delta_legal_moves": len(legal_moves) - len(legal_moves_shortlist),
                     "uci": uci,
                     "raw_move": raw_move,
                     "legal": ok,

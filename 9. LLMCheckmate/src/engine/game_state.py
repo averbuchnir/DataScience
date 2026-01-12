@@ -30,6 +30,71 @@ def get_legal_moves(state):
     return [m.uci() for m in board.legal_moves]
 
 
+import random
+import chess
+
+def shortlist_legal_moves(board: chess.Board, quiet_k: int = 8, seed: int | None = None) -> list[str]:
+    """
+    Return a shortlist of legal moves prioritizing tactical moves.
+
+    Includes:
+    - All checking moves
+    - All captures (including en passant)
+    - All promotions (including capture promotions)
+    - + K quiet moves (randomly sampled)
+
+    Returns:
+        list[str] of UCI moves
+    """
+    rng = random.Random(seed) if seed is not None else random
+
+    checking_moves: list[str] = []
+    capture_moves: list[str] = []
+    promotion_moves: list[str] = []
+    quiet_moves: list[str] = []
+
+    for move in board.legal_moves:
+        move_uci = move.uci()
+
+        # Promotions first (promotion captures should be treated as promotions)
+        if move.promotion is not None:
+            promotion_moves.append(move_uci)
+            continue
+
+        # Checks
+        if board.gives_check(move):
+            checking_moves.append(move_uci)
+            continue
+
+        # Captures (includes en passant)
+        if board.is_capture(move):
+            capture_moves.append(move_uci)
+            continue
+
+        # Quiet
+        quiet_moves.append(move_uci)
+
+    # Deduplicate while preserving priority order
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for group in (checking_moves, capture_moves, promotion_moves):
+        for mv in group:
+            if mv not in seen:
+                seen.add(mv)
+                ordered.append(mv)
+
+    # Add K quiet moves (random sample)
+    if quiet_k > 0 and quiet_moves:
+        k = min(quiet_k, len(quiet_moves))
+        for mv in rng.sample(quiet_moves, k):
+            if mv not in seen:
+                seen.add(mv)
+                ordered.append(mv)
+
+    return ordered
+
+
+
 def apply_move(state, uci):
     """
     Apply a UCI move to the board.

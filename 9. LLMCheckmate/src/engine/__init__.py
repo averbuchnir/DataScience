@@ -10,6 +10,7 @@ from .game_state import (
     new_game,
     get_fen,
     get_legal_moves,
+    shortlist_legal_moves,
     apply_move,
     is_game_over,
     result,
