@@ -2,7 +2,7 @@
 
 This repository showcases various data science skills and techniques that I have acquired and applied throughout my career as a researcher. The projects in this portfolio highlight proficiency in Python for data manipulation, exploratory data analysis (EDA), visualization (including 3D graphing), machine learning modeling, time-series analysis, and the development of interactive data applications. It is intended as a public-facing portfolio and research showcase for prospective collaborators or employers...
 
-## Table of Contents
+## Table of Contents 
 
 - [Project Overview](#project-overview)  
 - [Portfolio Projects](#portfolio-projects)  
@@ -12,7 +12,7 @@ This repository showcases various data science skills and techniques that I have
 - [Contributing](#contributing)  
 - [Contact](#contact)  
 
-## Project Overview
+## Project Overview-1
 
 In this portfolio, each directory contains a self-contained project or demonstration in Jupyter Notebook format. These projects span a range of data science domains and tasks, from cleaning and visualizing datasets to building predictive models and interactive tools. Each notebook is designed to showcase specific skills and methodologies in data science, reflecting the breadth of knowledge from my Ph.D. studies. By exploring these examples, you can see how I approach data problems, implement algorithms, ...
 
