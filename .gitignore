@@ -5,6 +5,10 @@
 # token files
 auth_token_str.txt
 
+# Log files
+Log/
+**/Log/
+
 # Python cache
 __pycache__/
 *.pyc
