@@ -4,12 +4,13 @@ A chess engine that pits Large Language Models (LLMs) against each other in ches
 
 ## Features
 
-- 🤖 **Multi-Model Support**: Play games between GPT and Gemini models
+- 🤖 **Multi-Model Support**: Play games between GPT and Gemini models across different tiers
+- 🏆 **Tournament System**: Automatic tournaments across Fast, Medium, and High tiers
 - 🎯 **Move History Context**: Models receive full game history for better decision-making
-- 📊 **Game Logging**: Automatic JSON logging of all game moves and states
+- 📊 **Comprehensive Game Logging**: Detailed JSON logging with metadata, timestamps, and move analysis
 - 🖼️ **Visualization**: Generates board images and animated GIFs of games
 - ♟️ **Chess Engine**: Uses `python-chess` for move validation and game state management
-- 🔄 **Retry Logic**: Automatic retry mechanism for illegal moves
+- 🔄 **Retry Logic**: Automatic retry mechanism for illegal moves (up to 3 attempts per move)
 
 ## Project Structure
 
@@ -55,7 +56,7 @@ LLMCheckmate/
 
 ## Usage
 
-### Running a Game
+### Running a Tournament
 
 Simply run the main script:
 
@@ -64,65 +65,133 @@ python main.py
 ```
 
 The script will:
-1. Randomly assign GPT and Gemini to white/black
-2. Play a game between the two models
-3. Save board images for each move
-4. Generate a JSON log of the game
-5. Create an animated GIF of the game
+1. Run tournaments across all tiers (Fast, Medium, High)
+2. For each tier, randomly assign GPT and Gemini to white/black
+3. Play games between the two models
+4. Save board images for each move
+5. Generate comprehensive JSON logs of each game
+6. Create animated GIFs of each game
+7. Display tournament summaries with win statistics
 
-### Output
+### Output Structure
 
-The game generates several outputs in the `Log/` directory:
+The game generates outputs organized by tier in the `Log/` directory:
 
+```
+Log/
+├── Fast/
+│   └── game_001/
+│       ├── board_001.png
+│       ├── board_002.png
+│       ├── game_log_YYYYMMDD_HHMMSS.json
+│       └── game_YYYYMMDD_HHMMSS.gif
+├── Medium/
+│   └── game_001/
+│       └── ...
+└── High/
+    └── game_001/
+        └── ...
+```
+
+Each game folder contains:
 - **Board Images**: `board_001.png`, `board_002.png`, ... (one per move)
-- **Game Log**: `game_log_YYYYMMDD_HHMMSS.json` (complete game data)
+- **Game Log**: `game_log_YYYYMMDD_HHMMSS.json` (complete game data with metadata)
 - **Animated GIF**: `game_YYYYMMDD_HHMMSS.gif` (visualization of the game)
 
 ### Game Log Format
 
-Each game log contains:
+Each game log is a comprehensive JSON object containing:
+
+**Game Metadata:**
+- `tier`: Tournament tier (Fast, Medium, High)
+- `game_number`: Game number in the tournament
+- `white_model`: Model playing white ("gpt" or "gemini")
+- `black_model`: Model playing black ("gpt" or "gemini")
+- `white_model_name`: Specific model name for white (e.g., "gpt-5-nano")
+- `black_model_name`: Specific model name for black (e.g., "gemini-2.0-flash-lite")
+- `initial_fen`: Starting board position
+- `game_start_time`: ISO timestamp of game start
+- `game_end_time`: ISO timestamp of game end
+- `result`: Game result ("1-0", "0-1", "1/2-1/2", or "*")
+- `winning_model`: Winning model or "draw"
+- `total_plies`: Total number of moves played
+- `game_over`: Boolean indicating if game ended
+- `final_fen`: Final board position
+
+**Move Information (in `moves` array):**
 - `ply`: Move number
 - `side`: "white" or "black"
 - `model`: "gpt" or "gemini"
-- `uci`: The move in UCI notation
+- `model_name`: Specific model name used
 - `fen_before`: Board state before the move
 - `fen_after`: Board state after the move
-- `legal_moves`: List of legal moves at that position
+- `uci`: The move in UCI notation
 - `raw_move`: Raw response from the model
-- `ok`: Whether the move was successfully applied
+- `legal`: Whether the move was successfully applied
+- `status`: "OK" or "ILLEGAL MOVE"
+- `timestamp`: Time of the move (HH:MM:SS.mmm format)
+- `legal_moves_count`: Number of legal moves available
+- `attempts`: Number of attempts made for this move
 
 ## How It Works
 
-1. **Game Initialization**: Creates a new chess game using `python-chess`
-2. **Move Generation**: For each turn:
+1. **Tournament Initialization**: Iterates through all tiers (Fast, Medium, High)
+2. **Game Setup**: For each game:
+   - Randomly assigns GPT and Gemini to white/black
+   - Creates game folder structure
+   - Initializes comprehensive game log
+3. **Move Generation**: For each turn:
    - Gets the current FEN position
    - Retrieves legal moves
    - Builds a prompt with FEN, move history, and legal moves
-   - Sends prompt to the appropriate LLM (GPT or Gemini)
-   - Extracts UCI move from the response
-3. **Move Validation**: Validates the move and retries if illegal (up to 3 attempts)
-4. **State Update**: Applies the move and updates the game state
-5. **Visualization**: Saves board images and generates GIFs
+   - Sends prompt to the appropriate LLM (GPT or Gemini) based on tier
+   - Extracts UCI move from the response using pattern matching
+4. **Move Validation**: Validates the move and retries if illegal (up to 3 attempts)
+5. **Logging**: Records detailed move information including timestamps, attempts, and status
+6. **State Update**: Applies the move and updates the game state
+7. **Visualization**: After game completion, saves board images and generates GIFs
+8. **Tournament Summary**: Displays win statistics across all tiers
 
 ## Model Configuration
 
-### GPT Models
+### Tier System
 
-Default model: `gpt-5-mini-2025-08-07`
+The project uses a tier-based system with different models for each tier:
 
-To change the model, edit `src/models/gpt.py`:
+- **Fast Tier**: 
+  - GPT: `gpt-5-nano`
+  - Gemini: `gemini-2.0-flash-lite`
+- **Medium Tier**: 
+  - GPT: `gpt-5-mini`
+  - Gemini: `gemini-3-flash-preview`
+- **High Tier**: 
+  - GPT: `gpt-5.2`
+  - Gemini: `gemini-3-pro-preview`
+
+### Changing Models
+
+To modify the models used in each tier, edit `src/models/get_model_names.py`:
+
 ```python
-def get_move_gpt(fen, side, legal_moves=None, move_history=None, model="your-model-name"):
+Model_Names = {
+    "Fast": {
+        "gpt": "your-gpt-model",
+        "gemini": "your-gemini-model"
+    },
+    "Medium": {
+        "gpt": "your-gpt-model",
+        "gemini": "your-gemini-model"
+    },
+    "High": {
+        "gpt": "your-gpt-model",
+        "gemini": "your-gemini-model"
+    }
+}
 ```
 
-### Gemini Models
+### Model Settings
 
-Default model: `gemini-3-pro-preview`
-
-To change the model, edit `src/models/gemini.py`:
-```python
-def get_move_gemini(fen, side, legal_moves=None, move_history=None, model="your-model-name"):
-```
+Models use default API settings without custom configuration parameters (temperature, top_p, etc.) to ensure compatibility across all tiers and model versions.
 
 ## Prompt Structure
 
@@ -159,12 +228,22 @@ You'll need API keys from:
 - **OpenAI**: Get your key from [OpenAI Platform](https://platform.openai.com/api-keys)
 - **Google**: Get your key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
+## Configuration
+
+### Game Settings
+
+In `main.py`, you can configure:
+- `number_of_games`: Number of games to play per tier (default: 1)
+- `max_plies`: Maximum number of plies per game to avoid infinite games (default: 3)
+- `max_retries`: Number of retry attempts for illegal moves (default: 3)
+
 ## Limitations
 
-- Maximum 100 plies per game (configurable in `main.py`)
-- Up to 3 retry attempts for illegal moves
+- Maximum plies per game is configurable (default: 3, can be increased in `main.py`)
+- Up to 3 retry attempts for illegal moves per move
 - Board images require internet connection (uses chessvision.ai API)
 - Rate limiting may apply depending on your API quotas
+- Models use default API settings (no custom temperature or sampling parameters)
 
 ## Contributing
 

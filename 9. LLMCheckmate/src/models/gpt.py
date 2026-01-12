@@ -58,22 +58,13 @@ def get_move_gpt(tier,fen, side, legal_moves=None, move_history=None, model="gpt
     """
     client = _get_client()
     prompt = build_move_prompt(fen, side, legal_moves, move_history)
-    if tier!="Fast":
-        config={
-            "temperature": 0.0, # no randomness : deterministic moves
-            "top_p": 1.0, # Use full probability distribution (no nucleus sampling)
-            "frequency_penalty": 0.0, # Do not penalize reuse of common moves
-            "max_completion_tokens": 10, # Maximum number of tokens in the response
-        }
-    else:
-        config={}
+    
     # get the response from the model
     resp = client.chat.completions.create(
         model=model,
         messages=[
             {"role": "user", "content": prompt}
         ],
-        **config,
     )
 
 

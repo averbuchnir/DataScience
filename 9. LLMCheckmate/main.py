@@ -76,7 +76,7 @@ def main():
             }
             board_positions = []
             ply = 0 # number of plies
-            max_plies = 3 # avoid infinite random games
+            max_plies = 10 # avoid infinite random games
             max_retries = 3 # number of retries for each move    
             while not is_game_over(state) and ply < max_plies:
                 fen_before = get_fen(state)

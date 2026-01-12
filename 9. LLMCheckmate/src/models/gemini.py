@@ -1,6 +1,5 @@
 import os
 from google import genai
-from google.genai.types import GenerateContentConfig
 from .prompts import build_move_prompt
 from dotenv import load_dotenv
 load_dotenv()
@@ -58,20 +57,10 @@ def get_move_gemini(tier,fen, side, legal_moves=None, move_history=None, model="
     """
     client = _get_client()
     prompt = build_move_prompt(fen, side, legal_moves, move_history)
-    gen_config = None
-    if tier != "Fast":
-        gen_config = GenerateContentConfig(
-            temperature=0.0,        # deterministic (if supported)
-            top_p=1.0,              # don't restrict probability mass
-            top_k=40,               # optional; often ignored when temp=0
-            max_output_tokens=10,   # one UCI move
-        )
 
     resp = client.models.generate_content(
         model=model,
         contents=prompt,
-        config=gen_config,  # <-- this is the key change
-
     )
     # extract UCI move from the response
     return _extract_uci_move(resp.text)
