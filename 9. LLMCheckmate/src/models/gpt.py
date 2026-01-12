@@ -52,20 +52,31 @@ def _extract_uci_move(text):
     return text.split()[0] if text else ""
 
 ## function to get move from GPT
-def get_move_gpt(fen, side, legal_moves=None, move_history=None, model="gpt-5-mini-2025-08-07"): # gpt-4o-mini
+def get_move_gpt(tier,fen, side, legal_moves=None, move_history=None, model="gpt-5-mini-2025-08-07"): #  gpt-5-mini-2025-08-07
     """
         return ONE UCI move from GPT model.
     """
     client = _get_client()
     prompt = build_move_prompt(fen, side, legal_moves, move_history)
+    if tier!="Fast":
+        config={
+            "temperature": 0.0, # no randomness : deterministic moves
+            "top_p": 1.0, # Use full probability distribution (no nucleus sampling)
+            "frequency_penalty": 0.0, # Do not penalize reuse of common moves
+            "max_completion_tokens": 10, # Maximum number of tokens in the response
+        }
+    else:
+        config={}
     # get the response from the model
     resp = client.chat.completions.create(
         model=model,
         messages=[
             {"role": "user", "content": prompt}
         ],
-        # temperature=0.7,
+        **config,
     )
+
+
 
     # extract UCI move from the response
     response_text = resp.choices[0].message.content
