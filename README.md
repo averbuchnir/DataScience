@@ -28,6 +28,8 @@ Each numbered directory in the repository corresponds to a distinct project or c
 - **6. Human_To_Animal:** A creative machine learning project that explores translating or comparing data patterns between human-related and animal-related datasets.
 - **7. Experiment-Randomizer:** A tool designed to assist with experimental design in scientific research.
 - **8. Custom Streamlit EDA:** A Streamlit-based platform for uploading datasets and constructing custom EDA dashboards via drag-and-drop, with AI-generated insights.
+- **9.LLMCheckmate :**  A chess engine that pits Large Language Models (LLMs) against each other in chess games.
+
 
 ## Installation
 
