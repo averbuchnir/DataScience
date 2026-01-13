@@ -1,16 +1,16 @@
 # LLMCheckmate
 
-A chess engine that pits Large Language Models (LLMs) against each other in chess games. This project allows GPT and Gemini models to play chess by providing them with board positions, legal moves, and move history, then extracting their moves from natural language responses.
+A chess engine that pits Large Language Models (LLMs) against each other in chess games. This project allows GPT and Gemini models to play chess by providing them with board positions and legal moves, then extracting their moves from natural language responses. Games are automatically logged with full move history for analysis.
 
 ## Features
 
 - 🤖 **Multi-Model Support**: Play games between GPT and Gemini models across different tiers
 - 🏆 **Tournament System**: Automatic tournaments across Fast, Medium, and High tiers
-- 🎯 **Move History Context**: Models receive full game history for better decision-making
 - 📊 **Comprehensive Game Logging**: Detailed JSON logging with metadata, timestamps, and move analysis
 - 🖼️ **Visualization**: Generates board images and animated GIFs of games
 - ♟️ **Chess Engine**: Uses `python-chess` for move validation and game state management
 - 🔄 **Retry Logic**: Automatic retry mechanism for illegal moves (up to 3 attempts per move)
+- 🎯 **Tier-Based Model Selection**: Automatically uses tier-specific models (Fast/Medium/High) from configuration
 
 ## Project Structure
 
@@ -142,9 +142,9 @@ Each game log is a comprehensive JSON object containing:
    - Initializes comprehensive game log
 3. **Move Generation**: For each turn:
    - Gets the current FEN position
-   - Retrieves legal moves
-   - Builds a prompt with FEN, move history, and legal moves
-   - Sends prompt to the appropriate LLM (GPT or Gemini) based on tier
+   - Retrieves legal moves and creates a shortlist (prioritizing tactical moves)
+   - Builds a prompt with FEN and legal moves shortlist
+   - Sends prompt to the appropriate LLM (GPT or Gemini) using tier-specific model name
    - Extracts UCI move from the response using pattern matching
 4. **Move Validation**: Validates the move and retries if illegal (up to 3 attempts)
 5. **Logging**: Records detailed move information including timestamps, attempts, and status
@@ -198,19 +198,19 @@ Models use default API settings without custom configuration parameters (tempera
 The prompt sent to models includes:
 - Current side to move (White/Black)
 - Current board position (FEN notation)
-- Previous moves in the game (UCI notation)
-- List of legal moves
-- Instructions for output format
+- List of legal moves (shortlist prioritizing tactical moves: checks, captures, promotions, plus random quiet moves)
+- Instructions for output format (UCI notation only)
 
 Example prompt:
 ```
-You are playing chess as White.
+Return EXACTLY ONE move in UCI notation.
+No explanation, no Extra Text, Any other text is INVALID.
+Prefer (in order): checkmate, check, capture, development, promotion, king safety
+Side to move: White
 Current board position (FEN): rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1
-Previous moves in this game (UCI notation):
-e2e4
 
-Task: Choose ONE legal move.
-...
+Legal moves (UCI) — choose ONE from this list:
+e2e4 e2e3 d2d4 d2d3 ...
 ```
 
 ## Dependencies
@@ -234,12 +234,12 @@ You'll need API keys from:
 
 In `main.py`, you can configure:
 - `number_of_games`: Number of games to play per tier (default: 1)
-- `max_plies`: Maximum number of plies per game to avoid infinite games (default: 3)
+- `max_plies`: Maximum number of plies per game to avoid infinite games (default: 100)
 - `max_retries`: Number of retry attempts for illegal moves (default: 3)
 
 ## Limitations
 
-- Maximum plies per game is configurable (default: 3, can be increased in `main.py`)
+- Maximum plies per game is configurable (default: 100, can be adjusted in `main.py`)
 - Up to 3 retry attempts for illegal moves per move
 - Board images require internet connection (uses chessvision.ai API)
 - Rate limiting may apply depending on your API quotas

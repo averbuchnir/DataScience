@@ -12,7 +12,16 @@ def build_move_prompt(fen, side, legal_moves, ascii_board=None):
     prompt = (
         "Return EXACTLY ONE move in UCI notation\n."
         "No explanation, no Extra Text, Any other text is INVALID.\n"
-        "Prefer (in order): checkmate, check, capture, development, promotion, king safety\n"
+        "PLAY AS AGGRESSIVELY AS POSSIBLE: prefer tactical, attacking and forcing moves, even if there is risk.\n"
+        "1. CHECKMATE (if available)\n"
+        "2. CHECK (threaten the king)\n"
+        "3. CAPTURE (take enemy pieces, especially valuable ones)\n"
+        "4. PROMOTION (advance pawns to promote)\n"
+        "5. ATTACK (create threats, fork, pin, skewer)\n"
+        "6. DEVELOPMENT (activate pieces, control center)\n"
+        "7. ADVANCE (move pieces forward, not backward)\n"
+        "AVOID PASSIVE MOVES: Do NOT make passive king shuffles, retreats, or defensive moves unless absolutely necessary.\n"
+        "Prefer moves that progress the game toward checkmate rather than maintaining position.\n"
         f"Side to move: {side}\n"
         f"Current board position (FEN): {fen}\n"
     )
