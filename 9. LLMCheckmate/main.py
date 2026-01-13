@@ -26,14 +26,14 @@ def get_move_model(tier,state, side, model, legal_moves=None, move_history=None,
 
 
 def main():
-    for tier in get_tier_keys()[::-1]:
+    for tier in get_tier_keys():
         print(f"Tier: {tier}")
         tier_gpt_model = get_model_names(tier)["gpt"]
         tier_gemini_model = get_model_names(tier)["gemini"]
-        print("=== performing tournament for {tier} tier ===")
+        print(f"=== performing tournament for {tier} tier ===")
         print("=== {} Vs {} ===".format(tier_gpt_model, tier_gemini_model))
     
-        number_of_games = 10  # Number of games to play in each tier
+        number_of_games = 1  # Number of games to play in each tier
         print("=== LLMCheckmate: Multiple Games Tournament ===")
         print(f"Playing {number_of_games} games...")
         print()
@@ -58,7 +58,7 @@ def main():
             print(f"White: {white_model}, Black: {black_model}")
 
             # Create folder for this game
-            game_folder = f"Log/{tier}/game_{game_num:03d}"
+            game_folder = f"Log/{tier}/game_{game_num:03d}(White={white_model})"
             os.makedirs(game_folder, exist_ok=True)
 
             game_log = {
@@ -77,7 +77,7 @@ def main():
             }
             board_positions = []
             ply = 0 # number of plies
-            max_plies = 50 # avoid infinite random games
+            max_plies = 100 # avoid infinite random games
             max_retries = 3 # number of retries for each move    
             while not is_game_over(state) and ply < max_plies:
                 fen_before = get_fen(state)
@@ -103,7 +103,7 @@ def main():
                         state=fen_before,
                         side=side_to_move,
                         model=model,
-                        legal_moves=legal_for_prompt,
+                        legal_moves=legal_moves,
                         # move_history=state["move_history"],
                         model_name=model_name,
                     )

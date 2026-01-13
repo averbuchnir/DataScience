@@ -51,12 +51,15 @@ def _extract_uci_move(text):
 
 # gemini-3-flash-preview
 # gemini-3-pro-preview"
-def get_move_gemini(tier,fen, side, legal_moves=None, move_history=None, model="gemini-3-flash-preview"): # models/gemini-2.5-flash-image"
+def get_move_gemini(tier,fen, side, legal_moves=None, move_history=None, model_name=None):
     """
     return ONE UCI move from Gemini model.
     """
     client = _get_client()
     prompt = build_move_prompt(fen, side, legal_moves, move_history)
+
+    # Use model_name if provided, otherwise fallback to default
+    model = model_name if model_name else "gemini-3-flash-preview"
 
     resp = client.models.generate_content(
         model=model,

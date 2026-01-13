@@ -52,12 +52,15 @@ def _extract_uci_move(text):
     return text.split()[0] if text else ""
 
 ## function to get move from GPT
-def get_move_gpt(tier,fen, side, legal_moves=None, move_history=None, model="gpt-5-mini-2025-08-07"): #  gpt-5-mini-2025-08-07
+def get_move_gpt(tier,fen, side, legal_moves=None, move_history=None, model_name=None):
     """
         return ONE UCI move from GPT model.
     """
     client = _get_client()
     prompt = build_move_prompt(fen, side, legal_moves, move_history)
+    
+    # Use model_name if provided, otherwise fallback to default
+    model = model_name if model_name else "gpt-5-mini-2025-08-07"
     
     # get the response from the model
     resp = client.chat.completions.create(

@@ -1,8 +1,5 @@
 # src/engine/game_state.py
 
-import chess
-import random
-
 def new_game():
     """
     Create and return a new game state.
