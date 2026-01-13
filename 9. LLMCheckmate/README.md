@@ -18,8 +18,8 @@ A chess engine that pits Large Language Models (LLMs) against each other in ches
 ```
 LLMCheckmate/
 ├── main.py                 # Main game loop
-├── main_test.py           # Test script
 ├── requirements.txt       # Python dependencies
+├── .env                   # Environment variables (needs to be created - see section 3)
 ├── src/
 │   ├── engine/           # Chess engine wrapper
 │   │   ├── game_state.py # Game state management
@@ -49,13 +49,21 @@ LLMCheckmate/
    ```
 
 3. **Set up environment variables**:
-   Create a `.env` file in the project root with your API keys:
+   Create a `.env` file in the project root directory (same level as `main.py` and `requirements.txt`) with your API keys:
    ```env
    OPENAI_API_KEY=your_openai_api_key_here
    GEMINI_API_KEY=your_gemini_api_key_here
    ```
+   
+   **Note**: The `.env` file is not included in the repository for security reasons. You must create it manually in the project root directory.
 
-## Usage
+
+4. **Generate API Keys**:
+   - **OpenAI**: Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys) (set up billing if needed)
+   - **Gemini**: Get your API key from [Google AI Studio](https://aistudio.google.com/app/api-keys) (set up billing if needed)
+   
+   Copy the generated keys and paste them into your `.env` file created in step 3.
+
 
 ### Running a Tournament
 
