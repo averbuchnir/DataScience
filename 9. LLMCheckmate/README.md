@@ -59,8 +59,8 @@ LLMCheckmate/
 
 
 4. **Generate API Keys**:
-   - **OpenAI**: Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys) (set up billing if needed)
-   - **Gemini**: Get your API key from [Google AI Studio](https://aistudio.google.com/app/api-keys) (set up billing if needed)
+   - **OpenAI**: Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys) - [models documentation](https://platform.openai.com/docs/overview) 
+   - **Gemini**: Get your API key from [Google AI Studio](https://aistudio.google.com/app/api-keys) - [models documentation](https://platform.openai.com/docs/overview) 
    
    Copy the generated keys and paste them into your `.env` file created in step 3.
 
@@ -238,9 +238,11 @@ e2e4 e2e3 d2d4 d2d3 ...
 
 ## API Keys
 
-You'll need API keys from:
-- **OpenAI**: Get your key from [OpenAI Platform](https://platform.openai.com/api-keys)
-- **Google**: Get your key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+For detailed instructions on generating API keys, see the [Installation](#installation) section above.
+
+Quick links:
+- **OpenAI**: [OpenAI Platform](https://platform.openai.com/api-keys)
+- **Gemini**: [Google AI Studio](https://aistudio.google.com/app/api-keys)
 
 ## Configuration
 
