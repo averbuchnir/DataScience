@@ -97,6 +97,8 @@ def main():
                 for attempt in range(max_retries+1):
                     num_attempts = attempt + 1
                     legal_for_prompt = legal_moves_shortlist  # use shortlist instead of all legal moves
+                    
+                    recent_moves = state["move_history"][-6:] if state["move_history"] else None  # last 3 full moves (6 plies)
 
                     raw_move = get_move_model(
                         tier=tier,
@@ -105,6 +107,7 @@ def main():
                         model=model,
                         legal_moves=legal_moves,
                         # move_history=state["move_history"],
+                        move_history=recent_moves 
                         model_name=model_name,
                     )
                     # get the first token of the response
