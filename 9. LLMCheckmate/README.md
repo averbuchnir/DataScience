@@ -11,6 +11,7 @@ A chess engine that pits Large Language Models (LLMs) against each other in ches
 - ♟️ **Chess Engine**: Uses `python-chess` for move validation and game state management
 - 🔄 **Retry Logic**: Automatic retry mechanism for illegal moves (up to 3 attempts per move)
 - 🎯 **Tier-Based Model Selection**: Automatically uses tier-specific models (Fast/Medium/High) from configuration
+- 📜 **Move History Context**: Models receive recent move history (last 3 full moves / 6 plies) for better decision-making
 
 ## Project Structure
 
@@ -143,7 +144,8 @@ Each game log is a comprehensive JSON object containing:
 3. **Move Generation**: For each turn:
    - Gets the current FEN position
    - Retrieves legal moves and creates a shortlist (prioritizing tactical moves)
-   - Builds a prompt with FEN and legal moves shortlist
+   - Extracts recent move history (last 6 plies / 3 full moves) for context
+   - Builds a prompt with FEN, legal moves shortlist, and recent move history
    - Sends prompt to the appropriate LLM (GPT or Gemini) using tier-specific model name
    - Extracts UCI move from the response using pattern matching
 4. **Move Validation**: Validates the move and retries if illegal (up to 3 attempts)
@@ -198,8 +200,11 @@ Models use default API settings without custom configuration parameters (tempera
 The prompt sent to models includes:
 - Current side to move (White/Black)
 - Current board position (FEN notation)
+- Recent move history (last 6 plies / 3 full moves in UCI notation) for context
 - List of legal moves (shortlist prioritizing tactical moves: checks, captures, promotions, plus random quiet moves)
 - Instructions for output format (UCI notation only)
+
+**Move History Context**: The system provides the last 6 plies (3 full moves) of move history to help models understand the recent game progression and make more informed decisions.
 
 Example prompt:
 ```
@@ -208,6 +213,7 @@ No explanation, no Extra Text, Any other text is INVALID.
 Prefer (in order): checkmate, check, capture, development, promotion, king safety
 Side to move: White
 Current board position (FEN): rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1
+Previous moves in this game (UCI notation): e2e4 e7e5
 
 Legal moves (UCI) — choose ONE from this list:
 e2e4 e2e3 d2d4 d2d3 ...
