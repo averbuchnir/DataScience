@@ -1,8 +1,12 @@
 
 import os
+import json
+import ast
 from openai import OpenAI
-from .prompts import build_move_prompt
+from .prompts import build_move_prompt,build_strategy_prompt
+from ..utils import get_current_time_display
 from dotenv import load_dotenv
+import re
 load_dotenv()
 
 
@@ -20,8 +24,20 @@ def _get_client():
     _client = OpenAI(api_key=api_key)
     return _client
 
+# general function to get response from GPT called "call_gpt_model"
+def _call_gpt_model(model_name, prompt):
+    client = _get_client()
+    resp = client.chat.completions.create(
+        model=model_name,
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+    )
+    return resp.choices[0].message.content
 
-import re
+
+
+
 
 def _extract_uci_move(text):
     """
@@ -51,27 +67,110 @@ def _extract_uci_move(text):
     # Last resort: return first token (original behavior)
     return text.split()[0] if text else ""
 
+def _extract_json_strategy(response):
+    if not response:
+        return {
+            "strategy": "balanced",
+            "confidence": 0.5,
+            "reason": "Failed to parse strategy response"
+        }
+    
+    # Strip markdown code blocks if present
+    text = response.strip()
+    if text.startswith("```"):
+        # Remove markdown code block markers
+        lines = text.split("\n")
+        lines = [line for line in lines if not line.strip().startswith("```")]
+        text = "\n".join(lines).strip()
+    
+    try:
+        return json.loads(text)
+    except Exception:
+        try:
+            # Try with single quotes converted to double quotes (for Python dict syntax)
+            text_single_to_double = text.replace("'", '"')
+            return json.loads(text_single_to_double)
+        except Exception:
+            try:
+                return ast.literal_eval(text)
+            except Exception:
+                return {
+                    "strategy": "balanced",
+                    "confidence": 0.5,
+                    "reason": "Failed to parse strategy response"
+                }
+
+def _extract_json_move(response):
+    if not response:
+        return {
+            "move": "",
+            "confidence": 0.5,
+            "reason": "Failed to parse move response"
+        }
+    
+    # Strip markdown code blocks if present
+    text = response.strip()
+    if text.startswith("```"):
+        # Remove markdown code block markers
+        lines = text.split("\n")
+        lines = [line for line in lines if not line.strip().startswith("```")]
+        text = "\n".join(lines).strip()
+    
+    try:
+        return json.loads(text)
+    except Exception:
+        try:
+            # Try with single quotes converted to double quotes (for Python dict syntax)
+            text_single_to_double = text.replace("'", '"')
+            return json.loads(text_single_to_double)
+        except Exception:
+            try:
+                return ast.literal_eval(text)
+            except Exception:
+                return {
+                    "move": "",
+                    "confidence": 0.5,
+                    "reason": "Failed to parse move response"
+                }
+
+
 ## function to get move from GPT
 def get_move_gpt(tier,fen, side, legal_moves=None, move_history=None, model_name=None):
     """
-        return ONE UCI move from GPT model.
+        return move, confidence, reason, strategy from GPT model.
     """
     client = _get_client()
-    prompt = build_move_prompt(fen, side, legal_moves, move_history)
+    strategy_prompt = build_strategy_prompt(fen, side, legal_moves, move_history)
+    gpt_strategy_response = _call_gpt_model(model_name, strategy_prompt)
+
+
+    print(f"{get_current_time_display()} - GPT Strategy Reasoning")
+    gpt_strategy_response = _extract_json_strategy(gpt_strategy_response)
+    # print(f"{get_current_time_display()} - {gpt_strategy_response}")
+
+
+    print(f"{get_current_time_display()} - GPT Move Reasoning")
+    # Extract strategy string from dict, not pass the whole dict
+    strategy_str = gpt_strategy_response.get("strategy", "balanced") if isinstance(gpt_strategy_response, dict) else "balanced"
+    prompt = build_move_prompt(fen, side, legal_moves, move_history=move_history, strategy=strategy_str)
+    get_gpt_move_response = _call_gpt_model(model_name, prompt)
+    get_gpt_move_response = _extract_json_move(get_gpt_move_response)
+
+    # print the move, confidence, reason, strategy
+    # print(f"{get_current_time_display()} - Move: {_extract_uci_move(get_gpt_move_response.get('move'))}")
+    # print(f"{get_current_time_display()} - Confidence: {gpt_strategy_response.get('confidence')}")
+    # print(f"{get_current_time_display()} - Reason: {gpt_strategy_response.get('reason')}")
+    # print(f"{get_current_time_display()} - Strategy: {gpt_strategy_response.get('strategy')}")
+    # a = input("Press Enter to continue...")
+    return _extract_uci_move(get_gpt_move_response.get("move")),gpt_strategy_response.get("confidence"),gpt_strategy_response.get("reason"),gpt_strategy_response.get("strategy")
+
     
-    # Use model_name if provided, otherwise fallback to default
-    model = model_name if model_name else "gpt-5-mini-2025-08-07"
     
-    # get the response from the model
-    resp = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
-    )
-
-
-
-    # extract UCI move from the response
-    response_text = resp.choices[0].message.content
-    return _extract_uci_move(response_text)
+    
+    
+    # # Use model_name if provided, otherwise fallback to default
+    # model = model_name if model_name else "gpt-5-mini-2025-08-07"
+    # final_response = call_gpt_model(model, prompt_with_strategy)
+    
+    
+    # return _extract_uci_move(response_text)

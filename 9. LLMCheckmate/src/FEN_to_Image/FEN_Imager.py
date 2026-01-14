@@ -2,6 +2,7 @@ from pathlib import Path
 from urllib.parse import quote
 import requests
 from PIL import Image
+from ..utils import get_current_time_display
 
 
 def save_board_png(fen: str, filename: str):
@@ -59,4 +60,4 @@ def frame_to_gif(frame_dir, output_gif, fps=10):
         optimize=True,
         quality=100,
     )
-    print(f"GIF animation saved to {output_gif}")
+    print(f"{get_current_time_display()} - GIF animation saved to {output_gif}")
