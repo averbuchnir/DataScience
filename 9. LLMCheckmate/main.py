@@ -25,7 +25,7 @@ def get_move_model(tier,state, side, model, legal_moves=None, move_history=None,
 
 
 def main():
-    for tier in get_tier_keys()[::-1]: # reverse the tier keys to start with the highest tier
+    for tier in get_tier_keys(): # reverse the tier keys to start with the highest tier
         print(f"{get_current_time_display()} - Tier: {tier}")
         tier_gpt_model = get_model_names(tier)["gpt"]
         tier_gemini_model = get_model_names(tier)["gemini"]

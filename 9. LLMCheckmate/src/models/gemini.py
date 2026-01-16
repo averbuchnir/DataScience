@@ -165,7 +165,7 @@ def get_move_gemini(tier,fen, side, legal_moves=None, move_history=None, model_n
     # print(f"{get_current_time_display()} - Gemini-Reason: {gemini_strategy_response.get('reason')}")
     # print(f"{get_current_time_display()} - Gemini-Strategy: {gemini_strategy_response.get('strategy')}")
 
-    return _extract_uci_move(gemini_move_response.get("move")),gemini_strategy_response.get("confidence"),gemini_strategy_response.get("reason"),gemini_strategy_response.get("strategy")
+    return _extract_uci_move(gemini_move_response.get("move")),gemini_move_response.get("confidence"),gemini_move_response.get("reason"),gemini_strategy_response.get("strategy")
     # a = input("From gemini.py: Press Enter to continue...")
 
 
