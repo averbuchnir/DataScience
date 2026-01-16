@@ -4,14 +4,14 @@ A chess engine that pits Large Language Models (LLMs) against each other in ches
 
 ## Features
 
-- 🤖 **Multi-Model Support**: Play games between GPT and Gemini models across different tiers
-- 🏆 **Tournament System**: Automatic tournaments across Fast, Medium, and High tiers
-- 📊 **Comprehensive Game Logging**: Detailed JSON logging with metadata, timestamps, and move analysis
-- 🖼️ **Visualization**: Generates board images and animated GIFs of games
-- ♟️ **Chess Engine**: Uses `python-chess` for move validation and game state management
-- 🔄 **Retry Logic**: Automatic retry mechanism for illegal moves (up to 3 attempts per move)
-- 🎯 **Tier-Based Model Selection**: Automatically uses tier-specific models (Fast/Medium/High) from configuration
-- 📜 **Move History Context**: Models receive recent move history (last 3 full moves / 6 plies) for better decision-making
+- **Multi-Model Support**: Play games between GPT and Gemini models across different tiers
+- **Tournament System**: Automatic tournaments across Fast, Medium, and High tiers
+- **Comprehensive Game Logging**: Detailed JSON logging with metadata, timestamps, and move analysis
+- **Visualization**: Generates board images and animated GIFs of games
+- **Chess Engine**: Uses `python-chess` for move validation and game state management
+- **Retry Logic**: Automatic retry mechanism for illegal moves (up to 3 attempts per move)
+- **Tier-Based Model Selection**: Automatically uses tier-specific models (Fast/Medium/High) from configuration
+- **Move History Context**: Models receive recent move history (last 3 full moves / 6 plies) for better decision-making
 
 ## Project Structure
 

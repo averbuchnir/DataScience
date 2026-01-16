@@ -224,7 +224,7 @@ def main():
             print(f"{get_current_time_display()} - The Winning Model is: {winning_model}")
             print(f"{get_current_time_display()} - Result: {game_result}")
             print(f"{get_current_time_display()} - Total plies: {ply}")
-            print(f"{get_current_time_display()} - Move history:")
+            print(f"{get_current_time_display()} - Move history:{' '.join(state['move_history'])}")
             # print(" ".join(state["move_history"]))
             
             # export game log to JSON in game-specific folder
