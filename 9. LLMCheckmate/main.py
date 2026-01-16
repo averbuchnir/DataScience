@@ -53,7 +53,6 @@ def main():
 
             ## Assign the model to colors
             white_model = random.choice(["gpt", "gemini"])
-            white_model = "gpt"
             black_model = "gemini" if white_model == "gpt" else "gpt"
             print(f"{get_current_time_display()} - White: {white_model}, Black: {black_model}\n")
 
@@ -110,7 +109,7 @@ def main():
                         state=fen_before, # current FEN position
                         side=side_to_move, # side to move
                         model=model, # model to use
-                        legal_moves=legal_moves, # legal moves shortlist/all legal moves
+                        legal_moves=legal_for_prompt, # legal moves shortlist/all legal moves
                         move_history=recent_moves, # recent moves for context
                         model_name=model_name, # model name
                     )
@@ -123,7 +122,7 @@ def main():
                     print(f"{get_current_time_display()} - {model}-Reason: {model_reason}")
                     print(f"{get_current_time_display()} - {model}-Strategy: {model_strategy}")
                     reasoning_time_minutes = (end_time_reasoning - start_time_reasoning) / 60
-                    print(f"{get_current_time_display()} - {model}-Reasoning Time: {reasoning_time_minutes:.2f} minutes")
+                    print(f"{get_current_time_display()} - {model}-Reasoning Time: {reasoning_time_minutes:.2f} minutes ({end_time_reasoning - start_time_reasoning:.2f} seconds)")
                     # get the first token of the response
                     uci = (model_move or "").strip().split()[0] if (model_move or "").strip() else ""
                     ok = apply_move(state, uci)

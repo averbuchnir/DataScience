@@ -3,7 +3,7 @@ import os
 import json
 import ast
 from openai import OpenAI
-from .prompts import build_move_prompt,build_strategy_prompt
+from .prompts import build_move_prompt,build_strategy_prompt,build_move_prompt_simple
 from ..utils import get_current_time_display
 from dotenv import load_dotenv
 import re
@@ -140,9 +140,14 @@ def get_move_gpt(tier,fen, side, legal_moves=None, move_history=None, model_name
         return move, confidence, reason, strategy from GPT model.
     """
     client = _get_client()
-    strategy_prompt = build_strategy_prompt(fen, side, legal_moves, move_history)
-    gpt_strategy_response = _call_gpt_model(model_name, strategy_prompt)
-
+    Flag_Advanced_Move_Prompt = False
+    if Flag_Advanced_Move_Prompt:
+        print(f"{get_current_time_display()} - GPT Advanced Move Prompt")
+        strategy_prompt = build_strategy_prompt(fen, side, legal_moves, move_history)
+        gpt_strategy_response = _call_gpt_model(model_name, strategy_prompt)
+    else:
+        print(f"{get_current_time_display()} - GPT Simple Move Prompt")
+        gpt_strategy_response = build_move_prompt_simple(fen, side, legal_moves)
 
     print(f"{get_current_time_display()} - GPT Strategy Reasoning")
     gpt_strategy_response = _extract_json_strategy(gpt_strategy_response)

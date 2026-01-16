@@ -3,7 +3,7 @@ import re
 import json
 import ast
 from google import genai
-from .prompts import build_move_prompt,build_strategy_prompt
+from .prompts import build_move_prompt,build_strategy_prompt,build_move_prompt_simple
 from ..utils import get_current_time_display
 from dotenv import load_dotenv
 load_dotenv()
@@ -145,10 +145,18 @@ def get_move_gemini(tier,fen, side, legal_moves=None, move_history=None, model_n
     print(f"{get_current_time_display()} - Gemini Move Reasoning")
 
     # Extract strategy string from dict, not pass the whole dict
-    strategy_str = gemini_strategy_response.get("strategy", "balanced") if isinstance(gemini_strategy_response, dict) else "balanced"
-    prompt = build_move_prompt(fen, side, legal_moves, move_history=move_history, strategy=strategy_str)
-    gemini_move_response = _call_gemini_model(model_name, prompt)
-    gemini_move_response = _extract_json_move(gemini_move_response)
+    Flag_Advanced_Move_Prompt = False
+    if Flag_Advanced_Move_Prompt:
+        print(f"{get_current_time_display()} - Gemini Advanced Move Prompt")
+        strategy_str = gemini_strategy_response.get("strategy", "balanced") if isinstance(gemini_strategy_response, dict) else "balanced"
+        prompt = build_move_prompt(fen, side, legal_moves, move_history=move_history, strategy=strategy_str)
+        gemini_move_response = _call_gemini_model(model_name, prompt)
+        gemini_move_response = _extract_json_move(gemini_move_response)
+    else:
+        print(f"{get_current_time_display()} - Gemini Simple Move Prompt")
+        prompt = build_move_prompt_simple(fen, side, legal_moves)
+        gemini_move_response = _call_gemini_model(model_name, prompt)
+        gemini_move_response = _extract_json_move(gemini_move_response)
 
     # print the move, confidence, reason, strategy
     # print(f"{get_current_time_display()} - Gemini-Move: {_extract_uci_move(gemini_move_response.get('move'))}")

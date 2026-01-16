@@ -115,19 +115,31 @@ def build_move_prompt(fen, side, legal_moves, move_history=None, strategy=None):
     
 
 
+# simple move prompt for the models 
+def build_move_prompt_simple(fen, side, legal_moves, ascii_board=None, strategy=None):
+    side = strict_side_name(side)
+    prompt = (
+        "Return EXACTLY ONE move in UCI notation\n."
+        "No explanation, no Extra Text, Any other text is INVALID.\n"
+        "PLAY AS AGGRESSIVELY AS POSSIBLE: prefer tactical, attacking and forcing moves, even if there is risk.\n"
+        "AVOID PASSIVE MOVES: Do NOT make passive king shuffles, retreats, or defensive moves unless absolutely necessary.\n"
+        f"Side to move: {side}\n"
+        f"Current board position (FEN): {fen}\n"
+    )
+    if ascii_board:
+        prompt += (f"\nBoard:\n{ascii_board}\n")
 
-# def build_move_prompt(fen, side, legal_moves, ascii_board=None, strategy=None):
-#     side = strict_side_name(side)
-#     prompt = (
-#         "Return EXACTLY ONE move in UCI notation\n."
-#         "No explanation, no Extra Text, Any other text is INVALID.\n"
-#         "PLAY AS AGGRESSIVELY AS POSSIBLE: prefer tactical, attacking and forcing moves, even if there is risk.\n"
-#         "AVOID PASSIVE MOVES: Do NOT make passive king shuffles, retreats, or defensive moves unless absolutely necessary.\n"
-#         f"Side to move: {side}\n"
-#         f"Current board position (FEN): {fen}\n"
-#     )
-#     if ascii_board:
-#         prompt += (f"\nBoard:\n{ascii_board}\n")
-#     prompt+= "\nLegal moves (UCI) — choose ONE from this list:\n" + " ".join(legal_moves) + "\n"
-#     return prompt
+    prompt+= "\nLegal moves (UCI) — choose ONE from this list:\n" + " ".join(legal_moves) + "\n"
+    prompt += ("IMPORTANT OUTPUT RULES:\n"
+     "- Output MUST be valid JSON\n"
+      "- Output MUST contain ONLY the JSON object\n"
+      "- Do NOT include any extra text\n"
+       "- Do NOT use markdown or\n\n"
+    "Output format (JSON only):\n"
+    '{"move":"<UCI move>","confidence":<number between 0 and 1>,"reason":"<short explanation>"}\n\n'
+    "Example output:\n"
+    '{"move":"e2e4","confidence":0.95,"reason":"I think e2e4 is the best move for this board position as im using ' + (strategy or "balanced") + ' strategy"}'
+    )
+
+    return prompt
 
