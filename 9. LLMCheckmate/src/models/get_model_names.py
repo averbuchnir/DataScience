@@ -1,7 +1,7 @@
 # dict by model Tier (Fast, Medium, High)
 Model_Names = {
     "Fast": {
-        "gpt": "gpt-5-nano",
+        "gpt": "gpt-4.1",
         "gemini": "gemini-2.0-flash-lite"
     },
     "Medium": {
