@@ -25,7 +25,7 @@ def get_move_model(tier,state, side, model, legal_moves=None, move_history=None,
 
 
 def main():
-    for tier in get_tier_keys():
+    for tier in get_tier_keys()[::-1]: # reverse the tier keys to start with the highest tier
         print(f"{get_current_time_display()} - Tier: {tier}")
         tier_gpt_model = get_model_names(tier)["gpt"]
         tier_gemini_model = get_model_names(tier)["gemini"]
@@ -81,7 +81,8 @@ def main():
             board_positions = []
             ply = 0 # number of plies
             max_plies = 100 # avoid infinite random games
-            max_retries = 3 # number of retries for each move    
+            max_retries = 3 # number of retries for each move
+            illegal_move_failure, failed_side = False, None # Tracking varaible for illegal move failure
             while not is_game_over(state) and ply < max_plies:
                 fen_before = get_fen(state)
                 side_to_move = "white" if ply % 2 == 0 else "black"
@@ -176,6 +177,8 @@ def main():
                 game_log["moves"].append(move_info)
                 
                 if not ok:
+                    illegal_move_failure = True
+                    failed_side = side_to_move
                     print(f"{get_current_time_display()} - ERROR: illegal move generated after {max_retries + 1} attempts: {uci}")
                     break
  
@@ -188,15 +191,25 @@ def main():
                 
             # Determine winner
             game_result = result(state)
-            if game_result == "1-0":
-                winning_model = white_model
-                wins[white_model] += 1
-            elif game_result == "0-1":
-                winning_model = black_model
-                wins[black_model] += 1
+            if illegal_move_failure:
+                # the OPPONENT WINS due to illegal move failure
+                if failed_side == "white":
+                    game_result = "0-1"
+                    winning_model = black_model
+                else:
+                    game_result = "1-0"
+                    winning_model = white_model
+                wins[winning_model] += 1
             else:
-                winning_model = "draw"
-                wins["draw"] += 1
+                if game_result == "1-0":
+                    winning_model = white_model
+                    wins[white_model] += 1
+                elif game_result == "0-1":
+                    winning_model = black_model
+                    wins[black_model] += 1
+                else:
+                    winning_model = "draw"
+                    wins["draw"] += 1
             
             # Update game_log with final results
             game_log["result"] = game_result

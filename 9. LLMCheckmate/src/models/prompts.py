@@ -116,7 +116,7 @@ def build_move_prompt(fen, side, legal_moves, move_history=None, strategy=None):
 
 
 # simple move prompt for the models 
-def build_move_prompt_simple(fen, side, legal_moves, ascii_board=None, strategy=None):
+def build_move_prompt_simple(fen, side, legal_moves, ascii_board=None):
     side = strict_side_name(side)
     prompt = (
         "Return EXACTLY ONE move in UCI notation\n."
@@ -138,7 +138,7 @@ def build_move_prompt_simple(fen, side, legal_moves, ascii_board=None, strategy=
     "Output format (JSON only):\n"
     '{"move":"<UCI move>","confidence":<number between 0 and 1>,"reason":"<short explanation>"}\n\n'
     "Example output:\n"
-    '{"move":"e2e4","confidence":0.95,"reason":"I think e2e4 is the best move for this board position as im using ' + (strategy or "balanced") + ' strategy"}'
+    '{"move":"e2e4","confidence":0.95,"reason":"I think e2e4 is the best move for this board position"}'
     )
 
     return prompt

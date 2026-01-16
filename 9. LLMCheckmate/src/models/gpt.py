@@ -144,38 +144,36 @@ def get_move_gpt(tier,fen, side, legal_moves=None, move_history=None, model_name
     if Flag_Advanced_Move_Prompt:
         print(f"{get_current_time_display()} - GPT Advanced Move Prompt")
         strategy_prompt = build_strategy_prompt(fen, side, legal_moves, move_history)
+        print(f"{get_current_time_display()} - GPT Strategy Reasoning")
         gpt_strategy_response = _call_gpt_model(model_name, strategy_prompt)
+        gpt_strategy_response = _extract_json_strategy(gpt_strategy_response)
+        strategy_str = gpt_strategy_response.get("strategy", "balanced") if isinstance(gpt_strategy_response, dict) else "balanced"
+        print(f"{get_current_time_display()} - GPT Move Reasoning (Advanced-Flow)")
+        prompt = build_move_prompt(fen, side, legal_moves, move_history=move_history, strategy=strategy_str)
+        get_gpt_move_response = _call_gpt_model(model_name, prompt)
+        get_gpt_move_response = _extract_json_move(get_gpt_move_response)
     else:
         print(f"{get_current_time_display()} - GPT Simple Move Prompt")
-        gpt_strategy_response = build_move_prompt_simple(fen, side, legal_moves)
+        prompt = build_move_prompt_simple(fen, side, legal_moves)
+        print(f"{get_current_time_display()} - GPT Move Reasoning (Simple-Flow)")
+        get_gpt_move_response = _call_gpt_model(model_name, prompt)
+        get_gpt_move_response = _extract_json_move(get_gpt_move_response)
+        # create a default strategy dict for return values
+        gpt_strategy_response = {
+            "strategy": "balanced (simple prompt mode)",
+            "confidence": get_gpt_move_response.get("confidence", 0.5),
+            "reason": "Simple prompt mode - no strategy reasoning"
+        }
 
-    print(f"{get_current_time_display()} - GPT Strategy Reasoning")
-    gpt_strategy_response = _extract_json_strategy(gpt_strategy_response)
-    # print(f"{get_current_time_display()} - {gpt_strategy_response}")
-
-
-    print(f"{get_current_time_display()} - GPT Move Reasoning")
-    # Extract strategy string from dict, not pass the whole dict
-    strategy_str = gpt_strategy_response.get("strategy", "balanced") if isinstance(gpt_strategy_response, dict) else "balanced"
-    prompt = build_move_prompt(fen, side, legal_moves, move_history=move_history, strategy=strategy_str)
-    get_gpt_move_response = _call_gpt_model(model_name, prompt)
-    get_gpt_move_response = _extract_json_move(get_gpt_move_response)
 
     # print the move, confidence, reason, strategy
     # print(f"{get_current_time_display()} - Move: {_extract_uci_move(get_gpt_move_response.get('move'))}")
-    # print(f"{get_current_time_display()} - Confidence: {gpt_strategy_response.get('confidence')}")
-    # print(f"{get_current_time_display()} - Reason: {gpt_strategy_response.get('reason')}")
+    # print(f"{get_current_time_display()} - Confidence: {get_gpt_move_response.get('confidence')}")
+    # print(f"{get_current_time_display()} - Reason: {get_gpt_move_response.get('reason')}")
     # print(f"{get_current_time_display()} - Strategy: {gpt_strategy_response.get('strategy')}")
     # a = input("Press Enter to continue...")
-    return _extract_uci_move(get_gpt_move_response.get("move")),gpt_strategy_response.get("confidence"),gpt_strategy_response.get("reason"),gpt_strategy_response.get("strategy")
+    return _extract_uci_move(get_gpt_move_response.get("move")),get_gpt_move_response.get("confidence"),get_gpt_move_response.get("reason"),gpt_strategy_response.get("strategy")
 
     
     
     
-    
-    # # Use model_name if provided, otherwise fallback to default
-    # model = model_name if model_name else "gpt-5-mini-2025-08-07"
-    # final_response = call_gpt_model(model, prompt_with_strategy)
-    
-    
-    # return _extract_uci_move(response_text)
