@@ -265,9 +265,6 @@ In `main.py`, you can configure:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
-
-[Add your license here]
 
 ## Acknowledgments
 
