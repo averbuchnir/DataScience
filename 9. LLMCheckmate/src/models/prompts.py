@@ -58,8 +58,7 @@ def build_move_prompt(fen, side, legal_moves, move_history=None, strategy=None):
         strategy = "balanced"
 
     prompt = (
-        "Return EXACTLY ONE move in UCI notation\n."
-        "You are a chess expert. You are given a board position and a list of legal moves. You need to choose a strategy to play the game."
+        "You are a chess expert. You are given a board position and a list of legal moves. You need to choose a move to play the game."
         f"Side to move: {side}\n"
         f"Current board position (FEN): {fen}\n"
         f"Legal moves (UCI) — choose ONE from this list:\n" + " ".join(legal_moves) + "\n"
@@ -119,10 +118,7 @@ def build_move_prompt(fen, side, legal_moves, move_history=None, strategy=None):
 def build_move_prompt_simple(fen, side, legal_moves, ascii_board=None):
     side = strict_side_name(side)
     prompt = (
-        "Return EXACTLY ONE move in UCI notation\n."
-        "No explanation, no Extra Text, Any other text is INVALID.\n"
-        "PLAY AS AGGRESSIVELY AS POSSIBLE: prefer tactical, attacking and forcing moves, even if there is risk.\n"
-        "AVOID PASSIVE MOVES: Do NOT make passive king shuffles, retreats, or defensive moves unless absolutely necessary.\n"
+        "You are a chess expert. You are given a board position and a list of legal moves. You need to choose a move to play the game."
         f"Side to move: {side}\n"
         f"Current board position (FEN): {fen}\n"
     )

@@ -85,6 +85,7 @@ def main():
             illegal_move_failure, failed_side = False, None # Tracking varaible for illegal move failure
             while not is_game_over(state) and ply < max_plies:
                 fen_before = get_fen(state)
+                
                 side_to_move = "white" if ply % 2 == 0 else "black"
                 model = white_model if side_to_move == "white" else black_model
                 model_name = tier_gpt_model if model == "gpt" else tier_gemini_model
