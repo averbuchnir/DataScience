@@ -32,7 +32,7 @@ def main():
         print(f"{get_current_time_display()} - === performing tournament for {tier} tier ===")
         print(f"{get_current_time_display()} - === {tier_gpt_model} Vs {tier_gemini_model} ===")
     
-        number_of_games = 1  # Number of games to play in each tier
+        number_of_games = 3  # Number of games to play in each tier
         print(f"{get_current_time_display()} - === LLMCheckmate: Multiple Games Tournament ===")
         print(f"{get_current_time_display()} - Playing {number_of_games} games...")
         print(f"{get_current_time_display()} - ")
