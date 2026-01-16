@@ -59,6 +59,7 @@ def build_move_prompt(fen, side, legal_moves, move_history=None, strategy=None):
 
     prompt = (
         "You are a chess expert. You are given a board position and a list of legal moves. You need to choose a move to play the game."
+        "Win as fast as possible when you have a winning advantage. Otherwise, play sound chess.\n"
         f"Side to move: {side}\n"
         f"Current board position (FEN): {fen}\n"
         f"Legal moves (UCI) — choose ONE from this list:\n" + " ".join(legal_moves) + "\n"
@@ -118,7 +119,8 @@ def build_move_prompt(fen, side, legal_moves, move_history=None, strategy=None):
 def build_move_prompt_simple(fen, side, legal_moves, ascii_board=None):
     side = strict_side_name(side)
     prompt = (
-        "You are a chess expert. You are given a board position and a list of legal moves. You need to choose a move to play the game."
+        "You are a chess expert. You are given a board position and a list of legal moves. You need to choose a move to play the game.\n"
+        "Win as fast as possible when you have a winning advantage. Otherwise, play sound chess.\n"
         f"Side to move: {side}\n"
         f"Current board position (FEN): {fen}\n"
     )
