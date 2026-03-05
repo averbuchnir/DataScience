@@ -140,7 +140,7 @@ def get_move_gpt(tier,fen, side, legal_moves=None, move_history=None, model_name
         return move, confidence, reason, strategy from GPT model.
     """
     client = _get_client()
-    Flag_Advanced_Move_Prompt = False
+    Flag_Advanced_Move_Prompt = True
     if Flag_Advanced_Move_Prompt:
         print(f"{get_current_time_display()} - GPT Advanced Move Prompt")
         strategy_prompt = build_strategy_prompt(fen, side, legal_moves, move_history)
