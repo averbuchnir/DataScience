@@ -80,7 +80,7 @@ def main():
             }
             board_positions = []
             ply = 0 # number of plies
-            max_plies = 100 # avoid infinite random games
+            max_plies = 250 # avoid infinite random games
             max_retries = 3 # number of retries for each move
             illegal_move_failure, failed_side = False, None # Tracking varaible for illegal move failure
             while not is_game_over(state) and ply < max_plies:
