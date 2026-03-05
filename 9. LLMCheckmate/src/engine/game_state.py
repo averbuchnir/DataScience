@@ -127,7 +127,7 @@ def is_game_over(state):
     Return True if the game is finished.
     Includes checkmate, stalemate, repetition, 50-move rule, insufficient material.
     """
-    return state["board"].is_game_over(claim_draw=True)
+    return state["board"].is_game_over(claim_draw=False)
 
 
 def result(state):
@@ -135,4 +135,4 @@ def result(state):
     Return game result:
     '1-0', '0-1', '1/2-1/2', or '*'
     """
-    return state["board"].result(claim_draw=True)
+    return state["board"].result(claim_draw=False)
